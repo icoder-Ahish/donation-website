@@ -58,7 +58,7 @@ export default function HomePage() {
               <p className="text-lg opacity-90">Join thousands of donors who are creating positive change around the world.</p>
             </div>
             <Button size="lg" variant="secondary" className="mt-6 md:mt-0 bg-white text-primary hover:bg-slate-100 hover:text-primary" asChild>
-              <Link href="#campaigns">
+              <Link href="/campaigns">
                 <a>Donate Today</a>
               </Link>
             </Button>

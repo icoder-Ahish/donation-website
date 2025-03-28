@@ -313,10 +313,10 @@ export default function PaymentPage() {
               
               <div className="space-y-2 mb-4">
                 <div className="flex items-center">
-                  <Checkbox id="emailReceipt" defaultChecked />
+                  {/* <Checkbox id="emailReceipt" defaultChecked />
                   <label htmlFor="emailReceipt" className="ml-2 text-sm">
                     Email me a receipt
-                  </label>
+                  </label> */}
                 </div>
                 <div className="flex items-center">
                   <Checkbox id="stayAnonymous" />

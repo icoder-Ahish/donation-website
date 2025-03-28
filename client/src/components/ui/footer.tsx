@@ -32,7 +32,6 @@ export default function Footer() {
             <ul className="space-y-2">
               <li><Link href="/about"><a className="text-slate-300 hover:text-white no-underline">Our Story</a></Link></li>
               <li><Link href="/team"><a className="text-slate-300 hover:text-white no-underline">Team</a></Link></li>
-              <li><Link href="/careers"><a className="text-slate-300 hover:text-white no-underline">Careers</a></Link></li>
               <li><Link href="/press"><a className="text-slate-300 hover:text-white no-underline">Press</a></Link></li>
             </ul>
           </div>
@@ -52,8 +51,6 @@ export default function Footer() {
             <ul className="space-y-2">
               <li><Link href="/terms"><a className="text-slate-300 hover:text-white no-underline">Terms</a></Link></li>
               <li><Link href="/privacy"><a className="text-slate-300 hover:text-white no-underline">Privacy</a></Link></li>
-              <li><Link href="/cookies"><a className="text-slate-300 hover:text-white no-underline">Cookies</a></Link></li>
-              <li><Link href="/security"><a className="text-slate-300 hover:text-white no-underline">Security</a></Link></li>
             </ul>
           </div>
           
@@ -62,7 +59,7 @@ export default function Footer() {
             <ul className="space-y-2">
               <li><Link href="/support"><a className="text-slate-300 hover:text-white no-underline">Support</a></Link></li>
               <li><Link href="/partnerships"><a className="text-slate-300 hover:text-white no-underline">Partnerships</a></Link></li>
-              <li><Link href="/sponsorships"><a className="text-slate-300 hover:text-white no-underline">Sponsorships</a></Link></li>
+              {/* <li><Link href="/sponsorships"><a className="text-slate-300 hover:text-white no-underline">Sponsorships</a></Link></li> */}
               <li><Link href="/contact"><a className="text-slate-300 hover:text-white no-underline">Contact Us</a></Link></li>
             </ul>
           </div>
@@ -70,14 +67,14 @@ export default function Footer() {
         
         <div className="border-t border-slate-700 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center">
           <p className="text-slate-400">© {new Date().getFullYear()} GiveHope. All rights reserved.</p>
-          <div className="mt-4 md:mt-0">
+          {/* <div className="mt-4 md:mt-0">
             <select className="form-select form-select-sm bg-slate-800 text-white border-slate-700">
               <option selected>English (US)</option>
               <option>Español</option>
               <option>Français</option>
               <option>Deutsch</option>
             </select>
-          </div>
+          </div> */}
         </div>
       </div>
     </footer>

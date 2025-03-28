@@ -398,14 +398,14 @@ export default function CampaignDetails() {
                     render={({ field }) => (
                       <FormItem className="flex items-start space-x-3 space-y-0 pt-2">
                         <FormControl>
-                          <Checkbox
+                          {/* <Checkbox
                             checked={field.value}
                             onCheckedChange={field.onChange}
-                          />
+                          /> */}
                         </FormControl>
-                        <div className="space-y-1 leading-none">
+                        {/* <div className="space-y-1 leading-none">
                           <FormLabel>Make this a monthly donation</FormLabel>
-                        </div>
+                        </div> */}
                       </FormItem>
                     )}
                   />
@@ -416,13 +416,13 @@ export default function CampaignDetails() {
                     render={({ field }) => (
                       <FormItem className="flex items-start space-x-3 space-y-0">
                         <FormControl>
-                          <Checkbox
+                          {/* <Checkbox
                             checked={field.value}
                             onCheckedChange={field.onChange}
-                          />
+                          /> */}
                         </FormControl>
                         <div className="space-y-1 leading-none">
-                          <FormLabel>Cover transaction fees (3%)</FormLabel>
+                          {/* <FormLabel>Cover transaction fees (3%)</FormLabel> */}
                         </div>
                       </FormItem>
                     )}
