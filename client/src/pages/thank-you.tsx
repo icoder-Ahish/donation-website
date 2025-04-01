@@ -1,143 +1,268 @@
-import { useParams, Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useLocation, Link } from "wouter";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Campaign, Donation } from "@shared/schema";
+import { jsPDF } from "jspdf"; // You'll need to install this package
 
-export default function ThankYouPage() {
-  const { donationId } = useParams<{ donationId: string }>();
-  
-  const { data: donation, isLoading: isDonationLoading } = useQuery<Donation>({
-    queryKey: [`/api/donations/${donationId}`],
-    // Since we don't have this endpoint, we'll simulate it by showing a loading state
-    // In a real implementation, this would fetch the donation details
-  });
+interface PaymentDetails {
+  order_id: string;
+  donor_name: string;
+  payment_date: string;
+  payment_amount: number;
+  campaign_name?: string;
+  // other payment details
+}
 
-  // We'd also fetch the campaign details in a real implementation
-  const campaignId = 1; // This would come from the donation
-  const { data: campaign, isLoading: isCampaignLoading } = useQuery<Campaign>({
-    queryKey: [`/api/campaigns/${campaignId}`],
-  });
+export default function ThankYou() {
+  const [location] = useLocation();
+  const { toast } = useToast();
+  const [isVerifying, setIsVerifying] = useState(true);
+  const [paymentStatus, setPaymentStatus] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [paymentDetails, setPaymentDetails] = useState<PaymentDetails | null>(null);
 
-  // We'd also fetch recommended campaigns in a real implementation
-  const { data: recommendedCampaigns } = useQuery<Campaign[]>({
-    queryKey: ['/api/campaigns'],
-  });
+  useEffect(() => {
+    const verifyPayment = async () => {
+      try {
+        // Parse query parameters
+        const params = new URLSearchParams(window.location.search);
+        const orderId = params.get('order_id');
+        const donationId = params.get('donation_id');
 
-  const isLoading = isDonationLoading || isCampaignLoading;
+        if (!orderId || !donationId) {
+          setError("Missing payment information. Please try again.");
+          setIsVerifying(false);
+          return;
+        }
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-16 animate-pulse">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="h-20 w-20 bg-slate-200 rounded-full mx-auto mb-6"></div>
-          <div className="h-10 bg-slate-200 rounded w-3/4 mx-auto mb-4"></div>
-          <div className="h-6 bg-slate-200 rounded w-2/3 mx-auto mb-8"></div>
-          <div className="h-64 bg-slate-200 rounded mb-8"></div>
-        </div>
-      </div>
-    );
-  }
+        console.log("Verifying payment for order:", orderId, "donation:", donationId);
 
-  // Simulate the donation data for the UI
-  const simulatedDonation = {
-    transactionId: "GH87654321",
-    date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
-    paymentMethod: "Credit Card (•••• 4242)",
-    amount: 100,
-    fee: 3,
-    totalAmount: 103
+        try {
+          // Verify the payment status
+          const verificationResponse = await apiRequest("POST", "/api/payment/verify", {
+            orderId: orderId
+          });
+
+          console.log("Payment verification response:", verificationResponse);
+
+          if (verificationResponse.success) {
+            setPaymentStatus(verificationResponse.paymentStatus);
+            setPaymentDetails(verificationResponse.paymentDetails);
+
+            if (verificationResponse.paymentStatus === "SUCCESS" ||
+              verificationResponse.paymentStatus === "PAID") {
+              toast({
+                title: "Payment successful",
+                description: "Thank you for your donation!",
+              });
+            } else {
+              // Handle failed or canceled payments
+              toast({
+                title: "Payment not completed",
+                description: `Payment status: ${verificationResponse.paymentStatus || "Unknown"}`,
+                variant: "destructive",
+              });
+            }
+          } else {
+            setError(verificationResponse.message || "Failed to verify payment status.");
+            toast({
+              title: "Verification error",
+              description: verificationResponse.message || "Failed to verify payment status.",
+              variant: "destructive",
+            });
+          }
+        } catch (apiError: any) {
+          console.error("API error during payment verification:", apiError);
+          setError("Failed to verify payment status. Please contact support.");
+          toast({
+            title: "Verification error",
+            description: "We couldn't verify your payment status. Please contact support for assistance.",
+            variant: "destructive",
+          });
+        }
+      } catch (error: any) {
+        console.error("Payment verification error:", error);
+        setError(error.message || "Failed to verify payment status.");
+        toast({
+          title: "Verification error",
+          description: error.message || "Failed to verify payment status.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsVerifying(false);
+      }
+    };
+
+    verifyPayment();
+  }, [toast]);
+
+  const isSuccess = paymentStatus === "SUCCESS" || paymentStatus === "PAID";
+
+  // Function to generate and download PDF receipt
+  const downloadReceipt = () => {
+    if (!paymentDetails) return;
+
+    const doc = new jsPDF();
+
+    // Format date properly with fallback
+    const formattedDate = paymentDetails.payment_date ?
+      new Date(paymentDetails.payment_date).toLocaleDateString() || "N/A" :
+      new Date().toLocaleDateString();
+
+    // Add logo or header
+    doc.setFontSize(22);
+    doc.text("CareNest", 105, 20, { align: "center" });
+
+    // Add receipt title
+    doc.setFontSize(18);
+    doc.text("Donation Receipt", 105, 30, { align: "center" });
+
+    // Add horizontal line
+    doc.setLineWidth(0.5);
+    doc.line(20, 35, 190, 35);
+
+    // Add receipt details
+    doc.setFontSize(12);
+
+    // Donor information
+    doc.text(`Donor Name: ${paymentDetails.donor_name || "Anonymous"}`, 20, 50);
+    doc.text(`Order ID: ${paymentDetails.order_id}`, 20, 60);
+    doc.text(`Payment Date: ${formattedDate}`, 20, 70);
+    doc.text(`Amount: Rs. ${paymentDetails.payment_amount?.toFixed(2) || "0.00"}`, 20, 80);
+
+    if (paymentDetails.campaign_name) {
+      doc.text(`Campaign: ${paymentDetails.campaign_name}`, 20, 90);
+    }
+
+    // Add thank you message
+    doc.setFontSize(14);
+    doc.text("Thank you for your generous donation!", 105, 120, { align: "center" });
+    doc.setFontSize(12);
+    doc.text("Your contribution makes a real difference.", 105, 130, { align: "center" });
+
+    // Add footer
+    doc.setFontSize(10);
+    doc.text("CareNest - Making the world a better place", 105, 270, { align: "center" });
+
+    // Save the PDF
+    doc.save(`CareNest_Receipt_${paymentDetails.order_id}.pdf`);
   };
 
-  // Get two recommended campaigns, excluding the current one
-  const filteredRecommendations = recommendedCampaigns?.filter(c => c.id !== campaignId).slice(0, 2) || [];
 
   return (
-    <div className="container mx-auto px-4 py-16">
-      <div className="max-w-3xl mx-auto text-center">
-        <div className="bg-success bg-opacity-10 rounded-full p-4 inline-flex justify-center items-center mb-6">
-          <i className="bi bi-check-circle-fill text-success text-4xl"></i>
+    <div className="container mx-auto px-4 py-16 text-center">
+      {isVerifying ? (
+        <div className="flex flex-col items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+          <h2 className="text-2xl font-bold mb-2">Verifying Payment</h2>
+          <p className="text-slate-600">Please wait while we verify your payment...</p>
         </div>
-        
-        <h1 className="text-3xl font-bold mb-4">Thank You for Your Donation!</h1>
-        <p className="text-xl mb-8">
-          Your contribution of <span className="font-bold">${simulatedDonation.totalAmount.toFixed(2)}</span> to the {campaign?.title} will help {campaign?.description.toLowerCase()}
-        </p>
-        
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <h3 className="font-bold text-xl mb-4">Donation Receipt</h3>
-            
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-left">
-              <div className="text-slate-500">Transaction ID:</div>
-              <div className="text-right font-medium">{simulatedDonation.transactionId}</div>
-              
-              <div className="text-slate-500">Date:</div>
-              <div className="text-right font-medium">{simulatedDonation.date}</div>
-              
-              <div className="text-slate-500">Payment Method:</div>
-              <div className="text-right font-medium">{simulatedDonation.paymentMethod}</div>
-              
-              <div className="text-slate-500">Donation Amount:</div>
-              <div className="text-right font-medium">${simulatedDonation.amount.toFixed(2)}</div>
-              
-              <div className="text-slate-500">Transaction Fee:</div>
-              <div className="text-right font-medium">${simulatedDonation.fee.toFixed(2)}</div>
-              
-              <div className="text-slate-500 font-bold pt-2 border-t mt-2">Total:</div>
-              <div className="text-right font-bold pt-2 border-t mt-2">${simulatedDonation.totalAmount.toFixed(2)}</div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <p className="mb-8">
-          We've sent a receipt to your email. You'll receive updates about how your donation is making an impact.
-        </p>
-        
-        <div className="flex flex-wrap justify-center gap-4 mb-12">
-          <Button size="lg" asChild>
-            <Link href="/">
-              <a>Return to Home</a>
-            </Link>
-          </Button>
-          <Button variant="outline" size="lg">
-            <i className="bi bi-share me-2"></i> Share on Social Media
+      ) : error ? (
+        <div>
+          <h2 className="text-2xl font-bold mb-4 text-red-600">Payment Verification Failed</h2>
+          <p className="mb-6 text-slate-600">{error}</p>
+          <Button asChild>
+            <Link href="/">Return to Home</Link>
           </Button>
         </div>
-        
-        {filteredRecommendations.length > 0 && (
-          <div>
-            <h3 className="text-xl font-bold mb-6">Explore More Campaigns</h3>
-            <div className="grid md:grid-cols-2 gap-4">
-              {filteredRecommendations.map(campaign => (
-                <Card key={campaign.id}>
-                  <CardContent className="p-4">
-                    <h4 className="font-bold mb-2">{campaign.title}</h4>
-                    <div className="h-1.5 bg-slate-100 rounded-full mb-2">
-                      <div 
-                        className="h-full bg-primary rounded-full" 
-                        style={{ 
-                          width: `${Math.min(Math.round((Number(campaign.raisedAmount) / Number(campaign.goalAmount)) * 100), 100)}%` 
-                        }}
-                      ></div>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-slate-500">
-                        ${Number(campaign.raisedAmount).toLocaleString()} raised
-                      </span>
-                      <Button variant="outline" size="sm" asChild>
-                        <Link href={`/campaigns/${campaign.id}`}>
-                          <a>View</a>
-                        </Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+      ) : isSuccess ? (
+        <div>
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
           </div>
-        )}
-      </div>
+          <h2 className="text-3xl font-bold mb-4">Thank You for Your Donation!</h2>
+          <p className="text-xl mb-8 text-slate-600">Your payment was successful and your donation has been received.</p>
+
+          {/* Donation Details Card */}
+          {paymentDetails && (
+            <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6 mb-8">
+              <h3 className="text-xl font-semibold mb-4">Donation Details</h3>
+              <div className="space-y-2 text-left">
+                <p className="flex justify-between">
+                  <span className="text-slate-600">Donor:</span>
+                  <span className="font-medium">{paymentDetails.donor_name || "Anonymous"}</span>
+                </p>
+                <p className="flex justify-between">
+                  <span className="text-slate-600">Order ID:</span>
+                  <span className="font-medium">{paymentDetails.order_id}</span>
+                </p>
+                <p className="flex justify-between">
+                  <span className="text-slate-600">Date:</span>
+                  <span className="font-medium">
+                    {paymentDetails.payment_date ?
+                      new Date(paymentDetails.payment_date).toLocaleDateString() || "N/A" :
+                      new Date().toLocaleDateString()}
+                  </span>
+                </p>
+
+                <p className="flex justify-between">
+                  <span className="text-slate-600">Amount:</span>
+                  <span className="font-medium">₹{paymentDetails.payment_amount?.toFixed(2) || "0.00"}</span>
+                </p>
+              </div>
+
+              <Button
+                onClick={downloadReceipt}
+                variant="outline"
+                className="w-full mt-4"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Download Receipt
+              </Button>
+            </div>
+          )}
+
+          <p className="mb-8 text-slate-600">
+            Your contribution makes a real difference. We'll send you an email with the receipt and details of your donation.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button asChild>
+              <Link href="/">Return to Home</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/#campaigns">Explore More Campaigns</Link>
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h2 className="text-3xl font-bold mb-4">Payment Status: {paymentStatus}</h2>
+          <p className="text-xl mb-8 text-slate-600">
+            {paymentStatus === "FAILED" ?
+              "Your payment was not successful. Please try again or use a different payment method." :
+              paymentStatus === "CANCELLED" ?
+                "Your payment was cancelled. You can try again whenever you're ready." :
+                "Your payment is being processed. Please check your email for confirmation."}
+          </p>
+          <p className="mb-8 text-slate-600">
+            If you have any questions or concerns, please contact our support team.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button asChild>
+              <Link href="/">Return to Home</Link>
+            </Button>
+            {paymentStatus === "FAILED" || paymentStatus === "CANCELLED" ? (
+              <Button variant="outline" asChild>
+                <Link href={`/campaigns/${paymentDetails?.order_meta?.campaign_id || ""}`}>Try Again</Link>
+              </Button>
+            ) : (
+              <Button variant="outline" asChild>
+                <Link href="#contact">Contact Support</Link>
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

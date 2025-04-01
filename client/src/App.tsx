@@ -9,14 +9,22 @@ import HomePage from "@/pages/home";
 import CampaignDetails from "@/pages/campaign-details";
 import PaymentPage from "@/pages/payment";
 import ThankYouPage from "@/pages/thank-you";
+import BlogPage from "@/pages/blog";
+import TermsPage from "@/pages/terms";
+import PrivacyPage from "@/pages/privacy";
+import CampaignsPage from "@/pages/campaigns";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={HomePage} />
+      <Route path="/campaigns" component={CampaignsPage} />
       <Route path="/campaigns/:id" component={CampaignDetails} />
       <Route path="/payment/:donationId" component={PaymentPage} />
-      <Route path="/thank-you/:donationId" component={ThankYouPage} />
+      <Route path="/thank-you" component={ThankYouPage} />
+      <Route path="/blog" component={BlogPage} />
+      <Route path="/terms" component={TermsPage} />
+      <Route path="/privacy" component={PrivacyPage} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>

@@ -1,13 +1,13 @@
 import { z } from "zod";
 
-// MongoDB Object ID schema
-export const objectIdSchema = z.string().or(z.object({
+// MongoDB schema definitions
+const objectIdSchema = z.string().or(z.object({
   _id: z.string(),
   toString: z.function().returns(z.string())
 }));
 
 // Campaign schema
-export const campaignSchema = z.object({
+export const CampaignSchema = z.object({
   _id: objectIdSchema.optional(),
   title: z.string(),
   description: z.string(),
@@ -62,35 +62,6 @@ export const paymentSchema = z.object({
   updatedAt: z.date().optional(),
 });
 
-// Insert schemas for creating new records
-export const insertCampaignSchema = campaignSchema.omit({ 
-  _id: true,
-  raisedAmount: true,
-  donorCount: true,
-  featured: true,
-  createdAt: true,
-  updatedAt: true
-});
-
-export const insertDonationSchema = donationSchema.omit({ 
-  _id: true,
-  transactionId: true,
-  paymentMethod: true,
-  paymentStatus: true,
-  createdAt: true,
-  updatedAt: true
-});
-
-export const insertPaymentSchema = paymentSchema.omit({
-  _id: true,
-  paymentSessionId: true,
-  cfPaymentId: true,
-  paymentStatus: true,
-  paymentMessage: true,
-  createdAt: true,
-  updatedAt: true
-});
-
 // Form validation schemas
 export const donationFormSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -139,13 +110,18 @@ export const cashfreeWebhookSchema = z.object({
 });
 
 // Type exports
-export type InsertCampaign = z.infer<typeof insertCampaignSchema>;
-export type InsertDonation = z.infer<typeof insertDonationSchema>;
-export type InsertPayment = z.infer<typeof insertPaymentSchema>;
+export type CampaignData = z.infer<typeof CampaignSchema>;
+export type DonationData = z.infer<typeof donationSchema>;
+export type PaymentData = z.infer<typeof paymentSchema>;
 export type DonationForm = z.infer<typeof donationFormSchema>;
-export type Payment = z.infer<typeof paymentFormSchema>;
+export type PaymentForm = z.infer<typeof paymentFormSchema>;
 export type CashfreeOrder = z.infer<typeof cashfreeOrderSchema>;
 export type CashfreeWebhook = z.infer<typeof cashfreeWebhookSchema>;
-export type Campaign = z.infer<typeof campaignSchema>;
-export type Donation = z.infer<typeof donationSchema>;
-export type PaymentRecord = z.infer<typeof paymentSchema>;
+
+// Export additional types needed by the frontend
+export type Donation = z.infer<typeof donationSchema> & { id?: string };
+export type PaymentRecord = z.infer<typeof paymentSchema> & { id?: string };
+export type Campaign = z.infer<typeof CampaignSchema> & { id?: string };
+
+// Export Campaign schema with a different name to avoid circular reference
+export const Campaign = CampaignSchema;

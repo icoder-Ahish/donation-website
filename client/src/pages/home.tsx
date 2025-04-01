@@ -5,7 +5,7 @@ import HeroSection from "@/components/ui/hero-section";
 import CampaignCard from "@/components/ui/campaign-card";
 import StatsSection from "@/components/ui/stats-section";
 import HowItWorks from "@/components/ui/how-it-works";
-import { Campaign } from "@shared/schema";
+import { Campaign } from "@shared/mongodb-schema";
 
 export default function HomePage() {
   const { data: campaigns, isLoading, error } = useQuery<Campaign[]>({
@@ -19,10 +19,8 @@ export default function HomePage() {
       <section className="container mx-auto px-4 mb-16" id="campaigns">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold">Featured Campaigns</h2>
-          <Link href="/campaigns">
-            <a className="text-primary hover:underline flex items-center">
-              View all <i className="bi bi-arrow-right ms-1"></i>
-            </a>
+          <Link href="/campaigns" className="text-primary hover:underline flex items-center">
+            View all <i className="bi bi-arrow-right ms-1"></i>
           </Link>
         </div>
         
@@ -58,9 +56,7 @@ export default function HomePage() {
               <p className="text-lg opacity-90">Join thousands of donors who are creating positive change around the world.</p>
             </div>
             <Button size="lg" variant="secondary" className="mt-6 md:mt-0 bg-white text-primary hover:bg-slate-100 hover:text-primary" asChild>
-              <Link href="/campaigns">
-                <a>Donate Today</a>
-              </Link>
+              <Link href="/campaigns">Donate Today</Link>
             </Button>
           </div>
         </div>
