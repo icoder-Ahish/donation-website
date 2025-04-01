@@ -1,0 +1,178 @@
+Integrate Cashfree Payment Gateway into the Next.js (client-side with TypeScript) and Node.js (server-side with TypeScript) application. Ensure seamless payment processing, handling success and failure cases, and storing transaction details in the database.
+
+Payment Flow & Implementation Details:
+1. Server-Side Integration (Node.js + TypeScript)
+Use the cashfree-pg library.
+
+Implement the following two APIs:
+
+First API: /api/payment (Create Order & Return Order ID & Session ID)
+
+This API should accept order details from the client and create an order in Cashfree.
+
+The response should return order_id and session_id.
+
+Example Code:
+try {
+let request = {
+"order_amount": "should_come_from_client_side",
+"order_currency": "INR",
+"order_id": await generateOrderId(),
+"customer_details": {,
+"customer_phone": "should_come_from_client_side",
+"customer_name": "should_come_from_client_side",
+"customer_email": "should_come_from_client_side"
+},
+}
+
+Cashfree.PGCreateOrder("2023-08-01",request).then(response => {
+console.log(response.data);
+res.json(response.data);
+
+}).catch(error => {
+console.error(error.response.data.message);
+})
+
+} catch (error) {
+console.log(error);
+}
+
+Second API: /api/payment/verify (Verify Payment Status)
+
+This API should take order_id from the client, verify the payment status, and return the success/failure response.
+
+Example Code:
+try {
+
+let { orderId } = req.body;
+
+Cashfree.PGOrderFetchPayments("2023-08-01",orderId).then((response) => {
+
+res.json(response.data);
+}).catch(error => {
+console.error(error.response.data.message);
+})
+
+} catch (error) {
+console.log(error);
+}
+
+2. Client-Side Integration (Next.js + TypeScript)
+Use the cashfree-js library for handling payments.
+
+Initialize Cashfree SDK and integrate it into the payment workflow.
+
+SDK Initialization Example:
+let cashfree;
+
+let insitialzeSDK = async function () {
+cashfree = await load({
+mode: "sandbox",
+})
+}
+
+insitialzeSDK()
+const [orderId, setOrderId] = useState("")
+
+3. Handle Payment on "Donate Now" Button
+When the Donate Now button is clicked, call the /api/payment API with the required donor details.
+
+Get the payment_session_id and order_id from the response.
+
+Use Cashfree checkout to process the payment.
+
+Example:
+import { useState } from 'react'
+import axios from "axios"
+import {load} from '@cashfreepayments/cashfree-js'
+
+function App() {
+
+let cashfree;
+
+let insitialzeSDK = async function () {
+cashfree = await load({
+mode: "sandbox",
+})
+}
+
+insitialzeSDK()
+
+const [orderId, setOrderId] = useState("")
+
+const getSessionId = async () => {
+try {
+let res = await axios.get("http://localhost:8000/payment")
+
+if(res.data && res.data.payment_session_id){
+
+console.log(res.data)
+setOrderId(res.data.order_id)
+return res.data.payment_session_id
+}
+
+} catch (error) {
+console.log(error)
+}
+}
+
+const verifyPayment = async () => {
+try {
+
+let res = await axios.post("http://localhost:8000/verify", {
+orderId: orderId
+})
+
+if(res && res.data){
+alert("payment verified")
+}
+
+} catch (error) {
+console.log(error)
+}
+}
+
+const handleClick = async (e) => {
+e.preventDefault()
+try {
+
+let sessionId = await getSessionId()
+let checkoutOptions = {
+paymentSessionId : sessionId,
+redirectTarget:"_modal",
+}
+
+cashfree.checkout(checkoutOptions).then((res) => {
+console.log("payment initialized")
+
+verifyPayment(orderId)
+})
+
+} catch (error) {
+console.log(error)
+}
+
+}
+return (
+<>
+
+<h1>Cashfree payment getway</h1> <div className="card"> <button onClick={handleClick}> Donate now </button> </div>
+</>
+)
+}
+
+export default App
+
+4. Payment Status Handling
+After successful payment:
+
+Store donor information and payment details in the database.
+
+Redirect the user to the Thank You Page.
+
+If payment fails:
+
+Display an error message on the UI.
+
+Allow the donor to retry the payment.
+
