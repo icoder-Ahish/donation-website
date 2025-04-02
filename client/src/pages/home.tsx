@@ -7,6 +7,7 @@ import StatsSection from "@/components/ui/stats-section";
 import HowItWorks from "@/components/ui/how-it-works";
 import TeamSection from "@/components/ui/team-section";
 import DonnerSection from "@/components/ui/testimonial-section";
+import RecentSection from "@/components/ui/recent-donations";
 import { Campaign } from "@shared/mongodb-schema";
 
 export default function HomePage() {
@@ -51,6 +52,8 @@ export default function HomePage() {
       <TeamSection />
 
       <DonnerSection />
+
+      <RecentSection />
       <HowItWorks />
 
       <section className="py-12 bg-orange-600 text-white mb-16 rounded-lg shadow-lg">

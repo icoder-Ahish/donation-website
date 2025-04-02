@@ -10,6 +10,8 @@ import {
   DialogTitle,
   DialogClose
 } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 
 // Sample blog posts data
 const blogPosts = [
@@ -194,48 +196,108 @@ const blogPosts = [
     category: "Volunteer Stories"
   }
 ];
-
 export default function BlogPage() {
-  const [selectedBlog, setSelectedBlog] = useState<typeof blogPosts[0] | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const openBlogModal = (blog: typeof blogPosts[0]) => {
-    setSelectedBlog(blog);
-    setIsModalOpen(true);
-  };
+  // Get unique categories
+  const categories = Array.from(new Set(blogPosts.map(post => post.category)));
+
+  // Filter posts based on search term and selected category
+  const filteredPosts = blogPosts.filter(post => {
+    const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory ? post.category === selectedCategory : true;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container mx-auto px-4 py-10">
       <div className="text-center mb-12">
-        <h1 className="text-3xl font-bold mb-4">Our Blog</h1>
-        <p className="text-slate-600 max-w-2xl mx-auto">
-          Stay updated with our latest news, impact stories, and insights on how your donations are making a difference around the world.
+        <h1 className="text-4xl font-bold mb-4 text-gray-800">Our Blog</h1>
+        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          Stay updated with our latest news, success stories, and insights about making a difference.
         </p>
+        <div className="w-20 h-1 bg-orange-500 mx-auto mt-6"></div>
       </div>
 
+      {/* Search and filter */}
+      <div className="mb-10 flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="relative w-full md:w-1/3">
+          <Input
+            type="text"
+            placeholder="Search articles..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 border-orange-200 focus:border-orange-500 focus:ring focus:ring-orange-200"
+          />
+          {/* <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-orange-500">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-search" viewBox="0 0 16 16">
+              <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
+            </svg>
+          </div> */}
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Badge
+            variant="outline"
+            className={`cursor-pointer px-3 py-1 text-sm ${!selectedCategory ? 'bg-orange-100 text-orange-700 border-orange-300' : 'hover:bg-orange-50'}`}
+            onClick={() => setSelectedCategory(null)}
+          >
+            All
+          </Badge>
+          {categories.map(category => (
+            <Badge
+              key={category}
+              variant="outline"
+              className={`cursor-pointer px-3 py-1 text-sm ${selectedCategory === category ? 'bg-orange-100 text-orange-700 border-orange-300' : 'hover:bg-orange-50'}`}
+              onClick={() => setSelectedCategory(category)}
+            >
+              {category}
+            </Badge>
+          ))}
+        </div>
+      </div>
+
+      {/* Blog posts grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {blogPosts.map((blog) => (
-          <Card key={blog.id} className="overflow-hidden flex flex-col h-full">
-            <div className="relative h-48 overflow-hidden">
-              <img 
-                src={blog.imageUrl} 
-                alt={blog.title} 
-                className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
+        {filteredPosts.map((post) => (
+          <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-orange-100">
+            <div className="relative">
+              <img
+                src={post.imageUrl}
+                alt={post.title}
+                className="w-full h-48 object-cover"
               />
-              <div className="absolute top-3 right-3 bg-primary text-white text-xs px-2 py-1 rounded">
-                {blog.category}
+              <div className="absolute top-3 left-3">
+                <Badge className={`bg-white text-${post.color}-600 border-${post.color}-200 shadow-sm`}>
+                  <span className="mr-1 text-xl">{post.icon}</span> {post.category}
+                </Badge>
               </div>
             </div>
-            <div className="p-5 flex flex-col flex-grow">
-              <div className="text-sm text-slate-500 mb-2">
-                {blog.date} • By {blog.author}
+            <div className="p-5">
+              <h3 className="text-xl font-bold mb-2 text-gray-800 line-clamp-2">{post.title}</h3>
+              <p className="text-gray-600 mb-4 line-clamp-3">{post.excerpt}</p>
+
+              <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
+                <span className="flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  {post.date}
+                </span>
+                <span className="flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  {post.author}
+                </span>
               </div>
-              <h3 className="text-xl font-bold mb-3">{blog.title}</h3>
-              <p className="text-slate-600 mb-4 flex-grow">{blog.excerpt}</p>
-              <Button 
-                variant="outline" 
-                className="mt-auto"
-                onClick={() => openBlogModal(blog)}
+
+              <Button
+                onClick={() => setSelectedPost(post)}
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white"
               >
                 Read More
               </Button>
@@ -244,42 +306,93 @@ export default function BlogPage() {
         ))}
       </div>
 
-      {/* Blog Detail Modal */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          {selectedBlog && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-bold">{selectedBlog.title}</DialogTitle>
-                <DialogDescription className="text-sm text-slate-500">
-                  {selectedBlog.date} • By {selectedBlog.author} • {selectedBlog.category}
-                </DialogDescription>
-              </DialogHeader>
-              
-              <div className="mt-4">
-                <img 
-                  src={selectedBlog.imageUrl} 
-                  alt={selectedBlog.title} 
-                  className="w-full h-64 object-cover rounded-md mb-6"
-                />
-                <div 
-                  className="prose prose-slate max-w-none"
-                  dangerouslySetInnerHTML={{ __html: selectedBlog.content }}
-                />
-              </div>
-              
-              <div className="mt-6 flex justify-between items-center">
-                <Button variant="outline" asChild>
-                  <Link href="/campaigns">Support Our Work</Link>
+      {/* Empty state */}
+      {filteredPosts.length === 0 && (
+        <div className="text-center py-16 bg-orange-50 rounded-lg border border-orange-100">
+          <div className="text-5xl mb-4">📚</div>
+          <h3 className="text-xl font-bold text-gray-800 mb-2">No articles found</h3>
+          <p className="text-gray-600 mb-4">Try adjusting your search or filter criteria</p>
+          <Button
+            onClick={() => {
+              setSearchTerm("");
+              setSelectedCategory(null);
+            }}
+            variant="outline"
+            className="border-orange-300 text-orange-600 hover:bg-orange-100"
+          >
+            Clear Filters
+          </Button>
+        </div>
+      )}
+
+      {/* Blog post dialog */}
+      {selectedPost && (
+        <Dialog open={!!selectedPost} onOpenChange={() => setSelectedPost(null)}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold text-gray-800 flex items-center">
+                <span className="mr-2 text-2xl">{selectedPost.icon}</span>
+                {selectedPost.title}
+              </DialogTitle>
+              <DialogDescription className="flex justify-between items-center text-sm text-gray-500">
+                <span className="flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  {selectedPost.date}
+                </span>
+                <span className="flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  {selectedPost.author}
+                </span>
+              </DialogDescription>
+            </DialogHeader>
+
+            <img
+              src={selectedPost.imageUrl}
+              alt={selectedPost.title}
+              className="w-full h-64 object-cover rounded-md mb-4"
+            />
+
+            <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: selectedPost.content }}></div>
+
+            <div className="flex justify-between items-center mt-6 pt-6 border-t border-gray-200">
+              <Badge className={`bg-${selectedPost.color}-100 text-${selectedPost.color}-800 border-${selectedPost.color}-200`}>
+                <span className="mr-1">{selectedPost.icon}</span> {selectedPost.category}
+              </Badge>
+
+              <DialogClose asChild>
+                <Button variant="outline" className="border-orange-300 text-orange-600 hover:bg-orange-100">
+                  Close
                 </Button>
-                <DialogClose asChild>
-                  <Button variant="ghost">Close</Button>
-                </DialogClose>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+              </DialogClose>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Newsletter section */}
+      <div className="mt-16 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-8 text-white shadow-lg">
+        <div className="flex flex-col md:flex-row items-center justify-between">
+          <div className="mb-6 md:mb-0 md:mr-8">
+            <h3 className="text-2xl font-bold mb-2">Subscribe to Our Newsletter</h3>
+            <p className="text-orange-100">Stay updated with our latest stories, campaigns and impact reports.</p>
+          </div>
+
+          <div className="w-full md:w-1/2 flex">
+            <Input
+              type="email"
+              placeholder="Your email address"
+              className="rounded-r-none border-0 focus:ring-2 focus:ring-white text-gray-800"
+            />
+            <Button className="rounded-l-none bg-white text-orange-600 hover:bg-orange-100 border-0">
+              Subscribe
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

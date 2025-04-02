@@ -454,8 +454,8 @@ async function onSubmit(data: DonationForm) {
                             <Tabs defaultValue="story" className="mb-8">
                               <TabsList className="mb-2 bg-slate-100 p-1 rounded-lg">
                                 <TabsTrigger value="story" className="data-[state=active]:bg-white data-[state=active]:text-orange-600">Story</TabsTrigger>
-                                <TabsTrigger value="updates" className="data-[state=active]:bg-white data-[state=active]:text-orange-600">Updates</TabsTrigger>
-                                <TabsTrigger value="comments" className="data-[state=active]:bg-white data-[state=active]:text-orange-600">Comments</TabsTrigger>
+                                {/* <TabsTrigger value="updates" className="data-[state=active]:bg-white data-[state=active]:text-orange-600">Updates</TabsTrigger>
+                                <TabsTrigger value="comments" className="data-[state=active]:bg-white data-[state=active]:text-orange-600">Comments</TabsTrigger> */}
                               </TabsList>
                               
                               <TabsContent value="story" className="p-4 bg-white rounded-md shadow-sm">

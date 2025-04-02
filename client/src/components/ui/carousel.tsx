@@ -26,6 +26,7 @@ type CarouselContextProps = {
   scrollNext: () => void
   canScrollPrev: boolean
   canScrollNext: boolean
+  activeIndex: number // Add activeIndex to track current slide
 } & CarouselProps
 
 const CarouselContext = React.createContext<CarouselContextProps | null>(null)
@@ -65,6 +66,7 @@ const Carousel = React.forwardRef<
     )
     const [canScrollPrev, setCanScrollPrev] = React.useState(false)
     const [canScrollNext, setCanScrollNext] = React.useState(false)
+    const [activeIndex, setActiveIndex] = React.useState(0) // Track active slide index
 
     const onSelect = React.useCallback((api: CarouselApi) => {
       if (!api) {
@@ -73,6 +75,7 @@ const Carousel = React.forwardRef<
 
       setCanScrollPrev(api.canScrollPrev())
       setCanScrollNext(api.canScrollNext())
+      setActiveIndex(api.selectedScrollSnap()) // Update active index when slide changes
     }, [])
 
     const scrollPrev = React.useCallback(() => {
@@ -130,6 +133,7 @@ const Carousel = React.forwardRef<
           scrollNext,
           canScrollPrev,
           canScrollNext,
+          activeIndex, // Include activeIndex in context
         }}
       >
         <div
@@ -204,7 +208,7 @@ const CarouselPrevious = React.forwardRef<
       variant={variant}
       size={size}
       className={cn(
-        "absolute  h-8 w-8 rounded-full",
+        "absolute h-8 w-8 rounded-full",
         orientation === "horizontal"
           ? "-left-12 top-1/2 -translate-y-1/2"
           : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
@@ -250,6 +254,37 @@ const CarouselNext = React.forwardRef<
 })
 CarouselNext.displayName = "CarouselNext"
 
+// Add a new component for indicators
+const CarouselIndicators = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & { count: number }
+>(({ className, count, ...props }, ref) => {
+  const { api, activeIndex } = useCarousel()
+
+  return (
+    <div 
+      ref={ref}
+      className={cn("flex gap-1 justify-center mt-4", className)}
+      {...props}
+    >
+      {Array.from({ length: count }).map((_, index) => (
+        <button
+          key={index}
+          className={cn(
+            "w-2 h-2 rounded-full transition-all",
+            activeIndex === index 
+              ? "bg-primary w-4" // Make active indicator wider
+              : "bg-muted hover:bg-primary/50"
+          )}
+          onClick={() => api?.scrollTo(index)}
+          aria-label={`Go to slide ${index + 1}`}
+        />
+      ))}
+    </div>
+  )
+})
+CarouselIndicators.displayName = "CarouselIndicators"
+
 export {
   type CarouselApi,
   Carousel,
@@ -257,4 +292,5 @@ export {
   CarouselItem,
   CarouselPrevious,
   CarouselNext,
+  CarouselIndicators, // Export the new component
 }

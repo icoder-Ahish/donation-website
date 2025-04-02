@@ -4,7 +4,7 @@ import { FaFacebookF, FaTwitter, FaInstagram } from 'react-icons/fa';
 const teamMembers = [
   {
     id: 1,
-    name: "John Doe",
+    name: "Queen Doe",
     designation: "Founder & CEO",
     image: "/img/team-1.jpg",
     delay: "0.1s",
@@ -16,7 +16,7 @@ const teamMembers = [
   },
   {
     id: 2,
-    name: "Jane Smith",
+    name: "Raj Smith",
     designation: "Project Manager",
     image: "/img/team-2.jpg",
     delay: "0.3s",
@@ -28,7 +28,7 @@ const teamMembers = [
   },
   {
     id: 3,
-    name: "Mike Johnson",
+    name: "Ashish Jack",
     designation: "Development Lead",
     image: "/img/team-3.jpg",
     delay: "0.5s",
