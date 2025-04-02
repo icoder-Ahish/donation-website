@@ -12,6 +12,7 @@ import ThankYouPage from "@/pages/thank-you";
 import BlogPage from "@/pages/blog";
 import TermsPage from "@/pages/terms";
 import PrivacyPage from "@/pages/privacy";
+import RefundPage from "@/pages/refund_cancellation";
 import CampaignsPage from "@/pages/campaigns";
 
 function Router() {
@@ -25,6 +26,7 @@ function Router() {
       <Route path="/blog" component={BlogPage} />
       <Route path="/terms" component={TermsPage} />
       <Route path="/privacy" component={PrivacyPage} />
+      <Route path="/refund" component={RefundPage} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>

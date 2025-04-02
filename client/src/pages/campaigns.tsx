@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Campaign } from "@shared/mongodb-schema";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import CampaignCard from "@/components/ui/campaign-card";
 
 export default function CampaignsPage() {
   const [activeCategory, setActiveCategory] = useState<string>("All");
@@ -46,7 +46,7 @@ export default function CampaignsPage() {
           <Button 
             key={category}
             variant={activeCategory === category ? "default" : "outline"} 
-            className="rounded-full"
+            className={`rounded-full ${activeCategory === category ? 'bg-orange-500 hover:bg-orange-600' : 'hover:text-orange-500 hover:border-orange-500'}`}
             onClick={() => setActiveCategory(category)}
           >
             {category}
@@ -56,7 +56,7 @@ export default function CampaignsPage() {
 
       {isLoading && (
         <div className="text-center py-10">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-orange-500 border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
           <p className="mt-4 text-gray-600">Loading campaigns...</p>
         </div>
       )}
@@ -73,50 +73,10 @@ export default function CampaignsPage() {
         </div>
       )}
 
-      {/* Campaigns grid */}
+      {/* Campaigns grid using the CampaignCard component */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredCampaigns && filteredCampaigns.map((campaign: Campaign) => (
-          <Card key={campaign.id} className="overflow-hidden flex flex-col h-full">
-            <div className="relative h-48 overflow-hidden">
-              <img 
-                src={campaign.imageUrl} 
-                alt={campaign.title} 
-                className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
-              />
-              <div className="absolute top-0 right-0 bg-primary text-white px-3 py-1 m-2 rounded">
-                {campaign.category}
-              </div>
-            </div>
-            <div className="p-5 flex flex-col flex-grow">
-              <h3 className="text-xl font-semibold mb-3">{campaign.title}</h3>
-              <p className="text-gray-600 mb-4 flex-grow">{campaign.description}</p>
-              
-              {/* Progress bar */}
-              <div className="mb-4">
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
-                  <div 
-                    className="bg-primary h-2.5 rounded-full" 
-                    style={{ width: `${Math.min(100, (Number(campaign.raisedAmount) / Number(campaign.goalAmount)) * 100)}%` }}
-                  ></div>
-                </div>
-                <div className="flex justify-between text-sm mt-1">
-                  <span className="font-medium">₹{Number(campaign.raisedAmount).toLocaleString()}</span>
-                  <span className="text-gray-500">Goal: ₹{Number(campaign.goalAmount).toLocaleString()}</span>
-                </div>
-              </div>
-              
-              <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
-                <span>{campaign.donorCount} Donors</span>
-                <span>{campaign.daysLeft} Days Left</span>
-              </div>
-              
-              <Button asChild className="w-full">
-                <Link href={`/campaigns/${campaign.id}`}>
-                  <a>Donate Now</a>
-                </Link>
-              </Button>
-            </div>
-          </Card>
+          <CampaignCard key={campaign.id} campaign={campaign} />
         ))}
       </div>
     </div>

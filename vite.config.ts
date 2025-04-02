@@ -34,4 +34,10 @@ export default defineConfig({
     outDir: path.resolve(__dirname, "dist/public"),
     emptyOutDir: true,
   },
+  // Add server configuration to disable HMR overlay
+  server: {
+    hmr: {
+      overlay: false
+    }
+  }
 });

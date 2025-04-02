@@ -32,8 +32,8 @@ export default function CampaignDetails() {
   
    // Video player states
    const videoRef = useRef<HTMLVideoElement>(null);
-   const [isPlaying, setIsPlaying] = useState(false);
-   const [isMuted, setIsMuted] = useState(false);
+   const [isPlaying, setIsPlaying] = useState(true);
+   const [isMuted, setIsMuted] = useState(true);
 
   // Load Cashfree SDK
   useEffect(() => {
@@ -341,7 +341,7 @@ async function onSubmit(data: DonationForm) {
       <div className="container mx-auto px-4 py-16 text-center">
         <h2 className="text-2xl font-bold mb-4">Campaign Not Found</h2>
         <p className="mb-6">The campaign you're looking for doesn't exist or may have been removed.</p>
-        <Button asChild>
+        <Button asChild className="bg-orange-500 hover:bg-orange-600">
           <Link href="/">Return to Home</Link>
         </Button>
       </div>
@@ -359,12 +359,12 @@ async function onSubmit(data: DonationForm) {
         <nav className="flex mb-4" aria-label="Breadcrumb">
           <ol className="inline-flex items-center space-x-1 md:space-x-3">
             <li className="inline-flex items-center">
-              <Link href="/" className="text-sm text-slate-600 hover:text-primary">Home</Link>
+              <Link href="/" className="text-sm text-slate-600 hover:text-orange-500">Home</Link>
             </li>
             <li>
               <div className="flex items-center">
                 <span className="mx-2 text-slate-400">/</span>
-                <Link href="/#campaigns" className="text-sm text-slate-600 hover:text-primary">Campaigns</Link>
+                <Link href="/#campaigns" className="text-sm text-slate-600 hover:text-orange-500">Campaigns</Link>
               </div>
             </li>
             <li aria-current="page">
@@ -377,381 +377,479 @@ async function onSubmit(data: DonationForm) {
         </nav>
       </div>
 
-      
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          {/* <img 
-            src={campaign.imageUrl} 
-            alt={campaign.title} 
-            className="w-full h-auto object-cover rounded-lg mb-6"
-          /> */}
            {/* Campaign video player */}
-          <div className="video-container mb-6">
-            <video 
-              ref={videoRef}
-              className="video-player"
-              poster={campaign.imageUrl}
-              onEnded={() => setIsPlaying(false)}
-            >
-              <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-            <div className="video-overlay">
-              <div className="video-controls">
+          <div className="video-container relative mb-6 rounded-lg overflow-hidden shadow-lg">
+          <video 
+  ref={videoRef}
+  className="video-player w-full h-auto"
+  poster={campaign.imageUrl}
+  onEnded={() => setIsPlaying(false)}
+  onLoadedData={() => {
+    if (videoRef.current) {
+      videoRef.current.play()
+        .catch(e => console.log("Autoplay prevented:", e));
+    }
+  }}
+  autoPlay
+  muted
+>
+  <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4" />
+  Your browser does not support the video tag.
+</video>
+            <div className="video-overlay absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-100 hover:opacity-100 transition-opacity duration-300">
+              <div className="video-controls flex space-x-4">
                 <button 
-                  className="video-btn" 
-                  onClick={togglePlay} 
-                  aria-label={isPlaying ? "Play" : "Pause"}
-                >
-                  {isPlaying ? <Pause size={18} /> : <Play size={18} />}
-                </button>
-                <button 
-                  className="video-btn" 
-                  onClick={toggleMute} 
-                  aria-label={isMuted ? "Unmute" : "Mute"}
-                >
-                  {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="mb-6">
-            <div className="flex flex-wrap items-center gap-3 mb-4">
-              <span className={`px-3 py-1 rounded-full text-sm font-medium
-                ${campaign.category === "Environment" ? "bg-sky-100 text-sky-800" : 
-                campaign.category === "Education" ? "bg-amber-100 text-amber-800" : 
-                campaign.category === "Healthcare" ? "bg-emerald-100 text-emerald-800" : ""}
-              `}>
-                {campaign.category}
-              </span>
-              <span className="text-slate-500 text-sm">
-                <i className="bi bi-clock me-1"></i>{campaign.daysLeft} days left
-              </span>
-            </div>
-            
-            <h1 className="text-3xl font-bold mb-3">{campaign.title}</h1>
-            <p className="text-lg text-slate-600">{campaign.description}</p>
-          </div>
-          
-          <div className="mb-6">
-            <div className="flex justify-between mb-2">
-              <div className="text-2xl font-bold">₹{Number(campaign.raisedAmount).toLocaleString()}</div>
-              <div className="text-slate-500">of ₹{Number(campaign.goalAmount).toLocaleString()} goal</div>
-            </div>
-            <div className="h-2.5 bg-slate-100 rounded-full mb-2">
-              <div 
-                className="h-full bg-primary rounded-full" 
-                style={{ width: `${percentFunded}%` }}
-              ></div>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-600">
-                <i className="bi bi-people-fill me-1"></i>{campaign.donorCount} donors
-              </span>
-              <span className="text-slate-600">{percentFunded}% funded</span>
-            </div>
-          </div>
-          
-          <Tabs defaultValue="story">
-            <TabsList className="mb-2">
-              <TabsTrigger value="story">Story</TabsTrigger>
-              <TabsTrigger value="updates">Updates</TabsTrigger>
-              <TabsTrigger value="comments">Comments</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="story" className="p-4 bg-slate-50 rounded-md">
-              <div dangerouslySetInnerHTML={{ __html: campaign.fullDescription }}></div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-              <img 
-                  src="https://images.unsplash.com/photo-1635236066069-cd6e699a8a2a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80" 
-                  alt="Project impact" 
-                  className="rounded-md"
-                />
-                <img 
-                  src="https://images.unsplash.com/photo-1616628188859-7a11abb6fcc9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80" 
-                  alt="Project impact" 
-                  className="rounded-md"
-                />
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="updates" className="p-4 bg-slate-50 rounded-md">
-              <div className="border-b pb-4 mb-4">
-                <div className="flex mb-4">
-                  <div className="flex-shrink-0 mr-3">
-                    <div className="w-12 h-12 rounded-full bg-slate-300 overflow-hidden">
-                      <img 
-                        src="https://i.pravatar.cc/48?img=1"
-                        alt="Project Coordinator"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="font-bold mb-1">First village system installed!</h4>
-                    <p className="text-sm text-slate-500 mb-3">Posted by Sarah Johnson, Project Coordinator • 3 days ago</p>
-                    <p>We're thrilled to announce that we've successfully installed the first water purification system in Nyarugusu village! The system is already providing clean water to over 500 residents.</p>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <div className="flex">
-                  <div className="flex-shrink-0 mr-3">
-                    <div className="w-12 h-12 rounded-full bg-slate-300 overflow-hidden">
-                      <img 
-                        src="https://i.pravatar.cc/48?img=2"
-                        alt="Project Director"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="font-bold mb-1">Halfway to our goal!</h4>
-                    <p className="text-sm text-slate-500 mb-3">Posted by Michael Chang, Project Director • 2 weeks ago</p>
-                    <p>Thanks to your generous donations, we've reached 50% of our fundraising goal! This means we can begin ordering equipment for the next phase of installations.</p>
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="comments" className="p-4 bg-slate-50 rounded-md">
-              <div className="mb-6">
-                <div className="border-b pb-3 mb-3">
-                  <div className="flex">
-                    <div className="flex-shrink-0 mr-3">
-                      <div className="w-10 h-10 rounded-full bg-slate-300 overflow-hidden">
-                        <img 
-                          src="https://i.pravatar.cc/40?img=3"
-                          alt="Commenter"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <h5 className="font-bold text-sm mb-1">James Wilson</h5>
-                      <p className="text-xs text-slate-500 mb-2">2 days ago</p>
-                      <p className="text-sm">So happy to support this important cause. Clean water is a basic human right!</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border-b pb-3 mb-3">
-                  <div className="flex">
-                    <div className="flex-shrink-0 mr-3">
-                      <div className="w-10 h-10 rounded-full bg-slate-300 overflow-hidden">
-                        <img 
-                          src="https://i.pravatar.cc/40?img=4"
-                          alt="Commenter"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <h5 className="font-bold text-sm mb-1">Elena Rodriguez</h5>
-                      <p className="text-xs text-slate-500 mb-2">5 days ago</p>
-                      <p className="text-sm">I visited this region last year and saw the need firsthand. This initiative will make such a difference!</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h4 className="font-bold mb-3">Leave a Comment</h4>
-                <textarea 
-                  className="w-full p-3 border border-slate-300 rounded-md mb-3"
-                  rows={3}
-                  placeholder="Add your comment..."
-                ></textarea>
-                <Button>Post Comment</Button>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
-        
-        <div className="lg:col-span-1">
-          <Card className="sticky top-24 border-0 shadow-md">
-            <CardContent className="p-6">
-              <h3 className="text-xl font-bold mb-6 text-center">Support This Campaign</h3>
-              
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="firstName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>First Name</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                                    className="video-btn bg-orange-500 hover:bg-orange-600 text-white p-3 rounded-full shadow-lg transition-transform duration-300 hover:scale-110" 
+                                    onClick={togglePlay} 
+                                    aria-label={isPlaying ? "Pause" : "Play"}
+                                  >
+                                    {isPlaying ? <Pause size={24} /> : <Play size={24} />}
+                                  </button>
+                                  <button 
+                                    className="video-btn bg-orange-500 hover:bg-orange-600 text-white p-3 rounded-full shadow-lg transition-transform duration-300 hover:scale-110" 
+                                    onClick={toggleMute} 
+                                    aria-label={isMuted ? "Unmute" : "Mute"}
+                                  >
+                                    {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
                   
-                  <FormField
-                    control={form.control}
-                    name="lastName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Last Name</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                            <div className="mb-6">
+                              <div className="flex flex-wrap items-center gap-3 mb-4">
+                                <span className="px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800 border border-orange-200 shadow-sm">
+                                  {campaign.category}
+                                </span>
+                                <span className="text-slate-500 text-sm flex items-center">
+                                  <i className="bi bi-clock me-1"></i>{campaign.daysLeft} days left
+                                </span>
+                              </div>
+                              
+                              <h1 className="text-3xl font-bold mb-3 text-slate-800">{campaign.title}</h1>
+                              <p className="text-lg text-slate-600">{campaign.description}</p>
+                            </div>
+                            
+                            <div className="mb-6 bg-slate-50 p-4 rounded-lg shadow-sm">
+                              <div className="flex justify-between mb-2">
+                                <div className="text-2xl font-bold text-slate-800">₹{Number(campaign.raisedAmount).toLocaleString()}</div>
+                                <div className="text-slate-500">of ₹{Number(campaign.goalAmount).toLocaleString()} goal</div>
+                              </div>
+                              <div className="h-2.5 bg-slate-200 rounded-full mb-2">
+                                <div 
+                                  className="h-full bg-orange-500 rounded-full" 
+                                  style={{ width: `${percentFunded}%` }}
+                                ></div>
+                              </div>
+                              <div className="flex justify-between text-sm">
+                                <span className="text-slate-600 flex items-center">
+                                  <i className="bi bi-people-fill me-1"></i>{campaign.donorCount} donors
+                                </span>
+                                <span className="text-orange-600 font-medium">{percentFunded}% funded</span>
+                              </div>
+                            </div>
+                            
+                            <Tabs defaultValue="story" className="mb-8">
+                              <TabsList className="mb-2 bg-slate-100 p-1 rounded-lg">
+                                <TabsTrigger value="story" className="data-[state=active]:bg-white data-[state=active]:text-orange-600">Story</TabsTrigger>
+                                <TabsTrigger value="updates" className="data-[state=active]:bg-white data-[state=active]:text-orange-600">Updates</TabsTrigger>
+                                <TabsTrigger value="comments" className="data-[state=active]:bg-white data-[state=active]:text-orange-600">Comments</TabsTrigger>
+                              </TabsList>
+                              
+                              <TabsContent value="story" className="p-4 bg-white rounded-md shadow-sm">
+                                <div dangerouslySetInnerHTML={{ __html: campaign.fullDescription }}></div>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                                  <img 
+                                    src="https://images.unsplash.com/photo-1635236066069-cd6e699a8a2a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80" 
+                                    alt="Project impact" 
+                                    className="rounded-md shadow-sm hover:shadow-md transition-shadow duration-300"
+                                  />
+                                  <img 
+                                    src="https://images.unsplash.com/photo-1616628188859-7a11abb6fcc9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80" 
+                                    alt="Project impact" 
+                                    className="rounded-md shadow-sm hover:shadow-md transition-shadow duration-300"
+                                  />
+                                </div>
+                              </TabsContent>
+                              
+                              <TabsContent value="updates" className="p-4 bg-white rounded-md shadow-sm">
+                                <div className="border-b pb-4 mb-4">
+                                  <div className="flex mb-4">
+                                    <div className="flex-shrink-0 mr-3">
+                                      <div className="w-12 h-12 rounded-full bg-slate-300 overflow-hidden">
+                                        <img 
+                                          src="https://i.pravatar.cc/48?img=1"
+                                          alt="Project Coordinator"
+                                          className="w-full h-full object-cover"
+                                        />
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <h4 className="font-bold mb-1">First village system installed!</h4>
+                                      <p className="text-sm text-slate-500 mb-3">Posted by Sarah Johnson, Project Coordinator • 3 days ago</p>
+                                      <p>We're thrilled to announce that we've successfully installed the first water purification system in Nyarugusu village! The system is already providing clean water to over 500 residents.</p>
+                                    </div>
+                                  </div>
+                                </div>
                   
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="email" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="mobile"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Mobile Number</FormLabel>
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            type="tel" 
-                            placeholder="+91 (XXX) XXX-XXXX"
-                            className="form-input"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div>
-                    <FormLabel>Donation Amount</FormLabel>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
-                      {[25, 50, 100, 250].map((amount) => (
-                        <div 
-                          key={amount}
-                          onClick={() => handlePresetAmountClick(amount)}
-                          className={`cursor-pointer px-4 py-2 border rounded-md text-center 
-                            ${amountType === 'preset' && presetAmount === amount
-                              ? 'border-primary bg-primary bg-opacity-5'
-                              : 'border-slate-200 hover:border-primary'
-                            }`
+                                <div>
+                                  <div className="flex">
+                                    <div className="flex-shrink-0 mr-3">
+                                      <div className="w-12 h-12 rounded-full bg-slate-300 overflow-hidden">
+                                        <img 
+                                          src="https://i.pravatar.cc/48?img=2"
+                                          alt="Project Director"
+                                          className="w-full h-full object-cover"
+                                        />
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <h4 className="font-bold mb-1">Halfway to our goal!</h4>
+                                      <p className="text-sm text-slate-500 mb-3">Posted by Michael Chang, Project Director • 2 weeks ago</p>
+                                      <p>Thanks to your generous donations, we've reached 50% of our fundraising goal! This means we can begin ordering equipment for the next phase of installations.</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </TabsContent>
+                              
+                              <TabsContent value="comments" className="p-4 bg-white rounded-md shadow-sm">
+                                <div className="mb-6">
+                                  <div className="border-b pb-3 mb-3">
+                                    <div className="flex">
+                                      <div className="flex-shrink-0 mr-3">
+                                        <div className="w-10 h-10 rounded-full bg-slate-300 overflow-hidden">
+                                          <img 
+                                            src="https://i.pravatar.cc/40?img=3"
+                                            alt="Commenter"
+                                            className="w-full h-full object-cover"
+                                          />
+                                        </div>
+                                      </div>
+                                      <div>
+                                        <h5 className="font-bold text-sm mb-1">James Wilson</h5>
+                                        <p className="text-xs text-slate-500 mb-2">2 days ago</p>
+                                        <p className="text-sm">So happy to support this important cause. Clean water is a basic human right!</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                  
+                                  <div className="border-b pb-3 mb-3">
+                                    <div className="flex">
+                                      <div className="flex-shrink-0 mr-3">
+                                        <div className="w-10 h-10 rounded-full bg-slate-300 overflow-hidden">
+                                          <img 
+                                            src="https://i.pravatar.cc/40?img=4"
+                                            alt="Commenter"
+                                            className="w-full h-full object-cover"
+                                          />
+                                        </div>
+                                      </div>
+                                      <div>
+                                        <h5 className="font-bold text-sm mb-1">Elena Rodriguez</h5>
+                                        <p className="text-xs text-slate-500 mb-2">5 days ago</p>
+                                        <p className="text-sm">I visited this region last year and saw the need firsthand. This initiative will make such a difference!</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                  
+                                <div>
+                                  <h4 className="font-bold mb-3">Leave a Comment</h4>
+                                  <textarea 
+                                    className="w-full p-3 border border-slate-300 rounded-md mb-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                    rows={3}
+                                    placeholder="Add your comment..."
+                                  ></textarea>
+                                  <Button className="bg-orange-500 hover:bg-orange-600 text-white">Post Comment</Button>
+                                </div>
+                              </TabsContent>
+                            </Tabs>
+                          </div>
+                          
+                          <div className="lg:col-span-1">
+                            <Card className="sticky top-24 border-0 shadow-md">
+                              <CardContent className="p-6">
+                                <h3 className="text-xl font-bold mb-6 text-center">Support This Campaign</h3>
+                                
+                                <Form {...form}>
+                                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                                    <FormField
+                                      control={form.control}
+                                      name="firstName"
+                                      render={({ field }) => (
+                                        <FormItem>
+                                          <FormLabel>First Name</FormLabel>
+                                          <FormControl>
+                                            <Input {...field} className="focus:ring-orange-500 focus:border-orange-500" />
+                                          </FormControl>
+                                          <FormMessage />
+                                        </FormItem>
+                                      )}
+                                    />
+                                    
+                                    <FormField
+                                      control={form.control}
+                                      name="lastName"
+                                      render={({ field }) => (
+                                        <FormItem>
+                                          <FormLabel>Last Name</FormLabel>
+                                          <FormControl>
+                                            <Input {...field} className="focus:ring-orange-500 focus:border-orange-500" />
+                                          </FormControl>
+                                          <FormMessage />
+                                        </FormItem>
+                                      )}
+                                    />
+                                    
+                                    <FormField
+                                      control={form.control}
+                                      name="email"
+                                      render={({ field }) => (
+                                        <FormItem>
+                                          <FormLabel>Email</FormLabel>
+                                          <FormControl>
+                                            <Input {...field} type="email" className="focus:ring-orange-500 focus:border-orange-500" />
+                                          </FormControl>
+                                          <FormMessage />
+                                        </FormItem>
+                                      )}
+                                    />
+                                    <FormField
+                                      control={form.control}
+                                      name="mobile"
+                                      render={({ field }) => (
+                                        <FormItem>
+                                          <FormLabel>Mobile Number</FormLabel>
+                                          <FormControl>
+                                            <Input 
+                                              {...field} 
+                                              type="tel" 
+                                              placeholder="+91 (XXX) XXX-XXXX"
+                                              className="focus:ring-orange-500 focus:border-orange-500"
+                                            />
+                                          </FormControl>
+                                          <FormMessage />
+                                        </FormItem>
+                                      )}
+                                    />
+                                    <div>
+                                      <FormLabel>Donation Amount</FormLabel>
+                                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
+                                        {[25, 50, 100, 250].map((amount) => (
+                                          <div 
+                                            key={amount}
+                                            onClick={() => handlePresetAmountClick(amount)}
+                                            className={`cursor-pointer px-4 py-2 border rounded-md text-center 
+                                              ${amountType === 'preset' && presetAmount === amount
+                                                ? 'border-orange-500 bg-orange-50 text-orange-600'
+                                                : 'border-slate-200 hover:border-orange-500 hover:bg-orange-50'
+                                              }`
+                                            }
+                                          >
+                                            ₹{amount}
+                                          </div>
+                                        ))}
+                                      </div>
+                                      
+                                      <div className="flex">
+                                        <span className="inline-flex items-center px-3 bg-slate-100 border border-r-0 border-slate-300 rounded-l-md">
+                                          ₹
+                                        </span>
+                                        <input
+                                          type="number"
+                                          className={`flex-1 p-2 border rounded-r-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500
+                                            ${amountType === 'custom' ? 'border-orange-500' : 'border-slate-300'}`
+                                          }
+                                          placeholder="Other amount"
+                                          min="1"
+                                          onChange={handleCustomAmountChange}
+                                        />
+                                      </div>
+                                      {form.formState.errors.amount && (
+                                        <p className="text-sm text-red-500 mt-1">{form.formState.errors.amount.message}</p>
+                                      )}
+                                    </div>
+                                    
+                                    <Button 
+                                      type="submit" 
+                                      className="w-full py-6 text-lg bg-orange-500 hover:bg-orange-600 text-white transition-all duration-300 hover:shadow-lg hover:shadow-orange-200" 
+                                      disabled={isProcessingPayment}
+                                    >
+                                      {isProcessingPayment ? "Processing..." : "Donate Now"} 
+                                      <i className="bi bi-arrow-right ms-2"></i>
+                                    </Button>
+                                    
+                                    <div className="text-center mt-3">
+                                      <p className="text-xs text-slate-500">
+                                        <i className="bi bi-shield-lock me-1"></i> Your payment information is secure
+                                      </p>
+                                    </div>
+                                  </form>
+                                </Form>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        </div>
+                        
+                        {/* Sticky donate button for mobile */}
+                        {showStickyDonate && (
+                          <div className="sticky-donate-btn fixed bottom-0 left-0 right-0 bg-white shadow-lg p-3 z-50 lg:hidden">
+                            <Button 
+                              className="w-full py-4 text-lg bg-orange-500 hover:bg-orange-600 text-white transition-all duration-300" 
+                              onClick={() => {
+                                // Scroll to the donation form section
+                                const donationForm = document.querySelector('.lg\\:col-span-1');
+                                if (donationForm) {
+                                  donationForm.scrollIntoView({ behavior: 'smooth' });
+                                }
+                              }}
+                            >
+                              Donate Now <i className="bi bi-arrow-right ms-2"></i>
+                            </Button>
+                          </div>
+                        )}
+                  
+                        {/* Add CSS for styling */}
+                        <style jsx="true" global="true">{`
+                          .video-container {
+                            position: relative;
+                            width: 100%;
+                            height: 0;
+                            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+                            background-color: #000;
                           }
-                        >
-                          ₹{amount}
-                        </div>
-                      ))}
-                    </div>
-                    
-                    <div className="flex">
-                      <span className="inline-flex items-center px-3 bg-slate-100 border border-r-0 border-slate-300 rounded-l-md">
-                        ₹
-                      </span>
-                      <input
-                        type="number"
-                        className={`flex-1 p-2 border border-slate-300 rounded-r-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary
-                          ${amountType === 'custom' ? 'border-primary' : ''}`
-                        }
-                        placeholder="Other amount"
-                        min="1"
-                        onChange={handleCustomAmountChange}
-                      />
-                    </div>
-                    {form.formState.errors.amount && (
-                      <p className="text-sm text-red-500 mt-1">{form.formState.errors.amount.message}</p>
-                    )}
-                  </div>
+                          
+                          .video-player {
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                            object-fit: cover;
+                          }
+                          
+                          .video-overlay {
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            background: rgba(0, 0, 0, 0.3);
+                            opacity: 0;
+                            transition: opacity 0.3s ease;
+                          }
+                          
+                          .video-container:hover .video-overlay {
+                            opacity: 1;
+                          }
+                          
+                          .video-btn {
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            cursor: pointer;
+                            border: none;
+                            outline: none;
+                          }
+                          
+                          .sticky-donate-btn {
+                            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+                            animation: slideUp 0.3s ease-out;
+                          }
+                          
+                          @keyframes slideUp {
+                            from {
+                              transform: translateY(100%);
+                            }
+                            to {
+                              transform: translateY(0);
+                            }
+                          }
+                          
+                          /* Responsive adjustments */
+                          @media (max-width: 768px) {
+                            .container {
+                              padding-bottom: 70px; /* Make room for sticky button */
+                            }
+                            
+                            .video-container {
+                              padding-bottom: 75%; /* Taller aspect ratio on mobile */
+                            }
+                          }
+                          
+                          /* Orange theme styles */
+                          .bg-orange-50 {
+                            background-color: #fff7ed;
+                          }
+                          
+                          .bg-orange-100 {
+                            background-color: #ffedd5;
+                          }
+                          
+                          .bg-orange-500 {
+                            background-color: #f97316;
+                          }
+                          
+                          .bg-orange-600 {
+                            background-color: #ea580c;
+                          }
+                          
+                          .text-orange-500 {
+                            color: #f97316;
+                          }
+                          
+                          .text-orange-600 {
+                            color: #ea580c;
+                          }
+                          
+                          .text-orange-800 {
+                            color: #9a3412;
+                          }
+                          
+                          .border-orange-200 {
+                            border-color: #fed7aa;
+                          }
+                          
+                          .border-orange-500 {
+                            border-color: #f97316;
+                          }
+                          
+                          .hover\:bg-orange-50:hover {
+                            background-color: #fff7ed;
+                          }
+                          
+                          .hover\:bg-orange-600:hover {
+                            background-color: #ea580c;
+                          }
+                          
+                          .hover\:border-orange-500:hover {
+                            border-color: #f97316;
+                          }
+                          
+                          .hover\:text-orange-500:hover {
+                            color: #f97316;
+                          }
+                          
+                          .focus\:ring-orange-500:focus {
+                            --tw-ring-color: #f97316;
+                          }
+                          
+                          .focus\:border-orange-500:focus {
+                            border-color: #f97316;
+                          }
+                          
+                          .shadow-orange-200 {
+                            --tw-shadow-color: #fed7aa;
+                          }
+                        `}</style>
+                      </div>
+                    );
+                  }
                   
-                  {/* <FormField
-                    control={form.control}
-                    name="isMonthly"
-                    render={({ field }) => (
-                      <FormItem className="flex items-start space-x-3 space-y-0 pt-2">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>Make this a monthly donation</FormLabel>
-                        </div>
-                      </FormItem>
-                    )}
-                  /> */}
                   
-                  {/* <FormField
-                    control={form.control}
-                    name="coverFees"
-                    render={({ field }) => (
-                      <FormItem className="flex items-start space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>Cover transaction fees (3%)</FormLabel>
-                        </div>
-                      </FormItem>
-                    )}
-                  /> */}
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full py-6 text-lg" 
-                    variant="destructive"
-                    disabled={isProcessingPayment}
-                  >
-                    {isProcessingPayment ? "Processing..." : "Donate Now"} 
-                    <i className="bi bi-arrow-right ms-2"></i>
-                  </Button>
-                  
-                  <div className="text-center mt-3">
-                    <p className="text-xs text-slate-500">
-                      <i className="bi bi-shield-lock me-1"></i> Your payment information is secure
-                    </p>
-                  </div>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-      
-      {/* Sticky donate button for mobile */}
-      {showStickyDonate && (
-        <div className="sticky-donate-btn">
-          <Button 
-            className="w-full py-6 text-lg" 
-            variant="destructive"
-            onClick={() => {
-              // Scroll to the donation form section
-              const donationForm = document.querySelector('.lg\\:col-span-1');
-              if (donationForm) {
-                donationForm.scrollIntoView({ behavior: 'smooth' });
-              }
-            }}
-          >
-            Donate Now <i className="bi bi-arrow-right ms-2"></i>
-          </Button>
-        </div>
-      )}
-    </div>
-  );
-}

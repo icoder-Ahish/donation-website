@@ -1,24 +1,24 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 
-// Carousel images and content
+// Carousel images and content - using placeholder images that we know work
 const carouselData = [
   {
     id: 1,
-    image: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80",
-    title: "Make a difference today",
+    image: "img/slide-1.jpg",
+    title: "Let's Change The World With Humanity",
     description: "Your generosity can change lives. Join our mission to help those in need and create lasting impact in communities around the world."
   },
   {
     id: 2,
-    image: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80",
-    title: "Empower communities worldwide",
+    image: "img/slide-2.jpg",
+    title: "Let's Save More Lives With Our Helping Hand",
     description: "Support projects that create sustainable change and help communities thrive through education, healthcare, and essential resources."
   },
   {
     id: 3,
-    image: "https://images.unsplash.com/photo-1598133894008-61f7fdb8cc3a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80",
+    image: "img/slide-3.jpg",
     title: "Every donation creates impact",
     description: "Whether big or small, your contribution matters. Join thousands of donors who are changing lives around the globe."
   }
@@ -27,28 +27,7 @@ const carouselData = [
 export default function HeroSection() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
   
-  // Function to create ripple effect on button click
-  const createRipple = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    const button = event.currentTarget;
-    
-    const circle = document.createElement("span");
-    const diameter = Math.max(button.clientWidth, button.clientHeight);
-    
-    circle.style.width = circle.style.height = `${diameter}px`;
-    circle.style.left = `${event.clientX - button.getBoundingClientRect().left - diameter / 2}px`;
-    circle.style.top = `${event.clientY - button.getBoundingClientRect().top - diameter / 2}px`;
-    circle.classList.add("ripple");
-    
-    const ripple = button.querySelector(".ripple");
-    if (ripple) {
-      ripple.remove();
-    }
-    
-    button.appendChild(circle);
-  };
-
   // Auto-advance the carousel
   const advanceCarousel = useCallback(() => {
     if (!isTransitioning) {
@@ -80,107 +59,204 @@ export default function HeroSection() {
     }
   };
 
-  // Initialize button refs
-  useEffect(() => {
-    buttonRefs.current = buttonRefs.current.slice(0, carouselData.length);
-  }, []);
+  const goToPrevSlide = () => {
+    if (!isTransitioning) {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setActiveSlide((prev) => (prev === 0 ? carouselData.length - 1 : prev - 1));
+        setTimeout(() => {
+          setIsTransitioning(false);
+        }, 700);
+      }, 300);
+    }
+  };
+
+  const goToNextSlide = () => {
+    if (!isTransitioning) {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setActiveSlide((prev) => (prev + 1) % carouselData.length);
+        setTimeout(() => {
+          setIsTransitioning(false);
+        }, 700);
+      }, 300);
+    }
+  };
 
   return (
-    <section className="relative py-24 md:py-32 mb-16 bg-gradient-to-r from-slate-900 to-slate-800 text-white overflow-hidden">
-      {/* Background overlay with subtle pattern */}
-      <div className="absolute inset-0 bg-black/30 z-0"></div>
-      
-      {/* Carousel background with enhanced overlay */}
-      <div className="carousel-container absolute inset-0">
-        {carouselData.map((slide, index) => (
-          <div 
-            key={slide.id}
-            className={`carousel-slide absolute inset-0 bg-cover bg-center transition-all duration-1500 ${index === activeSlide ? 'active' : ''}`}
-            style={{ 
-              backgroundImage: `url('${slide.image}')`,
-              opacity: index === activeSlide ? 0.8 : 0,
-              transform: `scale(${index === activeSlide ? '1' : '1.1'})`
-            }}
-          />
-        ))}
-      </div>
-      
-      {/* Subtle gradient overlay for better text readability */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent z-1"></div>
-      
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-2xl ml-0 md:ml-12 lg:ml-24">
-          {/* Carousel content with enhanced animations - left aligned */}
+    <div className="container-fluid p-0 mb-5">
+      <div id="header-carousel" className="carousel slide" data-bs-ride="carousel">
+        <div className="carousel-inner relative w-full h-[600px]">
           {carouselData.map((slide, index) => (
             <div 
               key={slide.id}
-              className={`transition-all duration-1000 ease-in-out ${
-                index === activeSlide 
-                  ? 'opacity-100 transform translate-y-0' 
-                  : 'opacity-0 absolute top-0 left-0 transform -translate-y-4'
-              }`}
-              style={{ display: index === activeSlide ? 'block' : 'none' }}
+              className={`carousel-item ${index === activeSlide ? 'active' : ''} relative w-full h-full`}
+              style={{ 
+                display: index === activeSlide ? 'block' : 'none',
+                height: '600px'
+              }}
             >
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent animate-fade-in text-left">
-                {slide.title}
-              </h1>
-              <p className="text-xl mb-8 text-slate-200 animate-slide-up animate-delay-200 text-left max-w-xl">
-                {slide.description}
-              </p>
+              <img 
+                className="w-100 h-full object-cover" 
+                src={slide.image} 
+                alt={`Image ${index + 1}`}
+              />
+              
+              {/* Orange gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-900/70 to-orange-500/50"></div>
+              
+              <div className="carousel-caption absolute inset-0 flex items-center justify-center">
+                <div className="container mx-auto">
+                  <div className="row justify-content-center">
+                    <div className="col-lg-7 pt-5 text-center">
+                      <h1 className="display-4 text-white mb-3 animated slideInDown text-4xl md:text-5xl font-bold">
+                        {slide.title}
+                      </h1>
+                      <p className="fs-5 text-white-50 mb-5 animated slideInDown text-lg">
+                        {slide.description}
+                      </p>
+                      <Link href="/campaigns">
+                        <Button 
+                          className="btn py-2 px-5 animated slideInDown bg-orange-500 text-white hover:bg-orange-600 transition-all duration-300 border-2 border-white shadow-lg"
+                        >
+                          Donate Now
+                          <div className="d-inline-flex btn-sm-square bg-white text-orange-500 rounded-full ms-2 w-6 h-6 flex items-center justify-center ml-2">
+                            <i className="bi bi-arrow-right"></i>
+                          </div>
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           ))}
-          
-          <div className="flex flex-wrap gap-4 animate-slide-up animate-delay-300 justify-start">
-            <Button 
-              size="lg" 
-              variant="destructive" 
-              asChild
-              className="btn-donate relative overflow-hidden py-6 px-8 text-lg font-semibold rounded-lg"
-              onClick={(e: any) => createRipple(e)}
-            >
-              <Link href="#campaigns">Explore Campaigns</Link>
-            </Button>
-            <Button 
-              size="lg" 
-              variant="destructive" 
-              asChild
-              className="btn-donate relative overflow-hidden py-6 px-8 text-lg font-semibold rounded-lg"
-              onClick={(e: any) => createRipple(e)}
-            >
-              <Link href="/campaigns">Donate Now</Link>
-            </Button>
-
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="bg-transparent text-white border-white hover:bg-white hover:text-slate-900 hover:border-white py-6 px-8 text-lg font-semibold rounded-lg relative overflow-hidden transition-all duration-300"
-              onClick={(e: any) => createRipple(e)}
-              asChild
-            >
-            </Button>
-          </div>
-          
-          {/* Enhanced carousel dots - left aligned */}
-          <div className="flex justify-start mt-12 animate-slide-up animate-delay-400">
-            {carouselData.map((_, index) => (
-              <button
-                key={index}
-                ref={el => buttonRefs.current[index] = el}
-                onClick={() => goToSlide(index)}
-                className={`carousel-dot mx-2 ${index === activeSlide ? 'active' : ''}`}
-                aria-label={`Go to slide ${index + 1}`}
-              />
-            ))}
-          </div>
         </div>
+        
+        <button 
+          className="carousel-control-prev absolute top-1/2 left-4 transform -translate-y-1/2 z-10"
+          type="button"
+          onClick={goToPrevSlide}
+        >
+          <span className="carousel-control-prev-icon bg-orange-500 p-3 rounded-circle" aria-hidden="true"></span>
+          <span className="visually-hidden">Previous</span>
+        </button>
+        
+        <button 
+          className="carousel-control-next absolute top-1/2 right-4 transform -translate-y-1/2 z-10"
+          type="button"
+          onClick={goToNextSlide}
+        >
+          <span className="carousel-control-next-icon bg-orange-500 p-3 rounded-circle" aria-hidden="true"></span>
+          <span className="visually-hidden">Next</span>
+        </button>
+        
+
+      {/* Carousel indicators with orange theme */}
+      <div className="carousel-indicators absolute bottom-4 left-0 right-0 flex justify-center items-center z-10 space-x-2">
+        {carouselData.map((_, index) => (
+          <button
+            key={index}
+            className={`w-3 h-3 rounded-full ${index === activeSlide ? 'bg-orange-500 active' : 'bg-white bg-opacity-50'}`}
+            onClick={() => goToSlide(index)}
+            aria-label={`Slide ${index + 1}`}
+          ></button>
+        ))}
+      </div>
       </div>
       
-      {/* Decorative element - animated arrow down */}
-      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 animate-bounce hidden md:block">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 5v14M5 12l7 7 7-7"/>
-        </svg>
-      </div>
-    </section>
+      {/* Add CSS for animations and orange theme */}
+      <style jsx="true" global="true">{`
+        .animated {
+          animation-duration: 1s;
+          animation-fill-mode: both;
+        }
+        
+        .slideInDown {
+          animation-name: slideInDown;
+        }
+        
+        .carousel-indicators {
+          margin: 0;
+          padding: 0;
+          list-style: none;
+          display: flex;
+          justify-content: center;
+          width: 100%;
+        }
+
+        .carousel-indicators button {
+          margin: 0 4px;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+        }
+        
+        .carousel-indicators button:hover {
+          background-color: #f97316 !important;
+        }
+
+        @keyframes slideInDown {
+          from {
+            transform: translate3d(0, -50px, 0);
+            opacity: 0;
+            visibility: visible;
+          }
+          
+          to {
+            transform: translate3d(0, 0, 0);
+            opacity: 1;
+          }
+        }
+        
+        .carousel-item {
+          position: relative;
+        }
+        
+        .carousel-item.active {
+          display: block;
+        }
+        
+        .carousel-caption {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+          display: inline-block;
+          width: 2rem;
+          height: 2rem;
+          background-repeat: no-repeat;
+          background-position: center;
+          background-size: 50%;
+          transition: all 0.3s ease;
+        }
+        
+        .carousel-control-prev-icon:hover,
+        .carousel-control-next-icon:hover {
+          background-color: #ea580c !important;
+          transform: scale(1.1);
+        }
+        
+        .carousel-control-prev-icon {
+          background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fff'%3e%3cpath d='M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z'/%3e%3c/svg%3e");
+        }
+        
+        .carousel-control-next-icon {
+          background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fff'%3e%3cpath d='M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+        }
+        
+        /* Orange glow effect for buttons */
+        .btn:hover {
+          box-shadow: 0 0 15px rgba(249, 115, 22, 0.7);
+        }
+      `}</style>
+    </div>
   );
 }

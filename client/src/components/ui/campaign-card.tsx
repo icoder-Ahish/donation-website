@@ -1,6 +1,5 @@
 import { Link } from "wouter";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Campaign } from "@shared/mongodb-schema";
 import { useRef } from "react";
@@ -36,157 +35,258 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
     
     button.appendChild(circle);
   };
-  
-  // Get badge style based on category
-  const getBadgeStyle = (category: string) => {
-    const styles = {
-      Environment: "bg-gradient-to-r from-sky-100 to-blue-100 text-sky-800 border-sky-200 shadow-sm",
-      Education: "bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 border-amber-200 shadow-sm",
-      Healthcare: "bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-800 border-emerald-200 shadow-sm",
-      Hunger: "bg-gradient-to-r from-orange-100 to-red-100 text-orange-800 border-orange-200 shadow-sm",
-      Disaster: "bg-gradient-to-r from-rose-100 to-pink-100 text-rose-800 border-rose-200 shadow-sm",
-      Water: "bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-800 border-blue-200 shadow-sm",
-      Animals: "bg-gradient-to-r from-teal-100 to-green-100 text-teal-800 border-teal-200 shadow-sm",
-      default: "bg-gradient-to-r from-gray-100 to-slate-100 text-gray-800 border-gray-200 shadow-sm"
-    };
-
-    return styles[category as keyof typeof styles] || styles.default;
-  };
 
   return (
-    <Card className="h-full card-hover group relative overflow-hidden bg-white hover:shadow-lg transition-all duration-300">
-      <div className="aspect-video w-full overflow-hidden relative">
-        <img 
-          src={campaign.imageUrl} 
-          alt={campaign.title} 
-          className="h-full w-full object-cover transform transition-transform duration-700 group-hover:scale-110"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+    <div className="causes-item d-flex flex-column bg-white border-top border-5 border-primary rounded-top overflow-hidden h-100 wow fadeInUp" data-wow-delay="0.1s">
+      <div className="text-center p-4 pt-0">
+        <div className="d-inline-block bg-orange-500 text-white rounded-bottom fs-5 pb-1 px-3 mb-4">
+          <small>{campaign.category}</small>
+        </div>
+        
+        <h5 className="mb-3">{campaign.title}</h5>
+        <p className="line-clamp-2">{campaign.description}</p>
+        
+        <div className="causes-progress bg-light p-3 pt-2">
+          <div className="d-flex justify-content-between">
+            <p className="text-dark">
+              ₹{Number(campaign.goalAmount).toLocaleString()} <small className="text-body">Goal</small>
+            </p>
+            <p className="text-dark">
+              ₹{Number(campaign.raisedAmount).toLocaleString()} <small className="text-body">Raised</small>
+            </p>
+          </div>
+          
+          <div className="progress">
+            <div 
+              className="progress-bar bg-orange-500" 
+              role="progressbar" 
+              style={{ width: `${percentFunded}%` }}
+              aria-valuenow={percentFunded} 
+              aria-valuemin={0} 
+              aria-valuemax={100}
+            >
+              <span>{percentFunded}%</span>
+            </div>
+          </div>
+        </div>
       </div>
       
-      <CardContent className="p-5">
-        <div className="flex justify-between items-center mb-3">
-          <Badge 
-            variant="outline"
-            className={`transition-all duration-300 ${getBadgeStyle(campaign.category)}`}
-          >
-            {campaign.category}
-          </Badge>
-          <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors duration-300 flex items-center">
-            <i className="bi bi-clock me-1 transition-transform duration-300 group-hover:scale-110"></i>
-            <span className="transition-transform duration-300 group-hover:translate-x-0.5">
-              {campaign.daysLeft} days left
-            </span>
-          </span>
-        </div>
-        
-        <h3 className="text-lg font-bold mb-2 transition-colors duration-300 group-hover:text-primary">{campaign.title}</h3>
-        <p className="text-sm text-slate-600 mb-4 line-clamp-2">{campaign.description}</p>
-        
-        <div className="mb-3">
-          {/* <div className="flex justify-between text-sm mb-2">
-            <span className="font-semibold text-slate-900">
-              ₹{Number(campaign.raisedAmount).toLocaleString()}
-            </span>
-            <span className="text-muted-foreground">
-              of ₹{Number(campaign.goalAmount).toLocaleString()}
-            </span>
-          </div> */}
-          {/* Progress bar */}
-          <div className="mb-4">
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
-                  <div 
-                    className="bg-primary h-2.5 rounded-full" 
-                    style={{ width: `${Math.min(100, (Number(campaign.raisedAmount) / Number(campaign.goalAmount)) * 100)}%` }}
-                  ></div>
-                </div>
-                <div className="flex justify-between text-sm mt-1">
-                  <span className="font-medium">₹{Number(campaign.raisedAmount).toLocaleString()}</span>
-                  <span className="text-gray-500">Goal: ₹{Number(campaign.goalAmount).toLocaleString()}</span>
-                </div>
-              </div>
-          {/* <div className="text-xs text-right mt-1 text-primary font-medium">
-            {percentFunded}% funded
-          </div> */}
-        </div>
-      </CardContent>
-      
-      <CardFooter className="px-5 pb-5 pt-0 flex justify-between items-center">
-        <span className="text-sm text-muted-foreground flex items-center group-hover:text-slate-700 transition-colors duration-300">
-          <i className="bi bi-people-fill me-1.5 text-primary/70 transition-transform duration-300 group-hover:scale-110"></i>
-          <span>{campaign.donorCount} donors</span>
-        </span>
-        <Button 
-          ref={buttonRef}
-          className="donate-btn bg-primary text-white hover:bg-primary/90 relative overflow-hidden transition-all duration-300 transform group-hover:scale-105 hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-1 rounded-full px-3 py-1 text-sm font-medium"
-          onClick={(e: any) => createRipple(e)}
-          asChild
-          size="sm"
-        >
-          <Link href={`/campaigns/${campaign.id}`}>
-            <span className="flex items-center">
-              Donate Now
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-heart-fill ml-1 group-hover:animate-pulse" viewBox="0 0 16 16">
-                <path fillRule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
-              </svg>
-
-            </span>
+      <div className="position-relative mt-auto">
+        <img className="img-fluid" src={campaign.imageUrl} alt={campaign.title} />
+        <div className="causes-overlay">
+          <Link href={`/campaigns/${campaign.id}`} className="btn btn-outline-primary">
+            Read More
+            <div className="d-inline-flex btn-sm-square bg-orange-500 text-white rounded-circle ms-2">
+              <i className="bi bi-arrow-right"></i>
+            </div>
           </Link>
-        </Button>
-      </CardFooter>
-      
-      {/* Decorative element */}
-      <div className="absolute -top-10 -right-10 w-20 h-20 bg-primary/10 rounded-full transition-all duration-500 ease-in-out group-hover:scale-150 group-hover:bg-primary/5"></div>
-      {campaign.featured && (
-        <div className="absolute top-3 right-3 flex items-center bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs py-1 px-2 rounded shadow-md animate-pulse">
-          <i className="bi bi-star-fill me-1"></i>
-          <span>Featured</span>
         </div>
-      )}
+      </div>
       
-      {/* Add CSS for ripple effect */}
-      <style jsx global>{`
-        .ripple {
-          position: absolute;
-          background: rgba(255, 255, 255, 0.7);
-          border-radius: 50%;
-          transform: scale(0);
-          animation: ripple 0.6s linear;
-          pointer-events: none;
-        }
-        
-        @keyframes ripple {
-          to {
-            transform: scale(4);
-            opacity: 0;
-          }
-        }
-        
-        .donate-btn {
-          position: relative;
+      {/* Add CSS for styling */}
+      <style jsx="true" global="true">{`
+        .causes-item {
+          display: flex;
+          flex-direction: column;
+          background-color: white;
+          border-top: 5px solid #f97316; /* orange-500 */
+          border-radius: 0.375rem 0.375rem 0 0;
           overflow: hidden;
-          z-index: 1;
+          height: 100%;
+          transition: all 0.3s ease;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         
-        .donate-btn::before {
-          content: '';
+        .causes-item:hover {
+          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .d-inline-block {
+          display: inline-block;
+        }
+        
+        .bg-orange-500 {
+          background-color: #f97316;
+        }
+        
+        .text-white {
+          color: white;
+        }
+        
+        .rounded-bottom {
+          border-radius: 0 0 0.25rem 0.25rem;
+        }
+        
+        .fs-5 {
+          font-size: 1.25rem;
+        }
+        
+        .pb-1 {
+          padding-bottom: 0.25rem;
+        }
+        
+        .px-3 {
+          padding-left: 0.75rem;
+          padding-right: 0.75rem;
+        }
+        
+        .mb-4 {
+          margin-bottom: 1.5rem;
+        }
+        
+        .mb-3 {
+          margin-bottom: 1rem;
+        }
+        
+        .text-dark {
+          color: #212529;
+        }
+        
+        .text-body {
+          color: #6c757d;
+        }
+        
+        .bg-light {
+          background-color: #f8f9fa;
+        }
+        
+        .p-3 {
+          padding: 1rem;
+        }
+        
+        .pt-2 {
+          padding-top: 0.5rem;
+        }
+        
+        .d-flex {
+          display: flex;
+        }
+        
+        .justify-content-between {
+          justify-content: space-between;
+        }
+        
+        .progress {
+          height: 1rem;
+          overflow: hidden;
+          background-color: #e9ecef;
+          border-radius: 0.25rem;
+          margin-top: 0.5rem;
+        }
+        
+        .progress-bar {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          overflow: hidden;
+          color: #fff;
+          text-align: center;
+          white-space: nowrap;
+          transition: width 0.6s ease;
+        }
+        
+        .position-relative {
+          position: relative;
+        }
+        
+        .mt-auto {
+          margin-top: auto;
+        }
+        
+        .img-fluid {
+          max-width: 100%;
+          height: auto;
+        }
+        
+        .causes-overlay {
           position: absolute;
           top: 0;
           left: 0;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.2));
-          z-index: -1;
-          transform: scaleX(0);
-          transform-origin: right;
-          transition: transform 0.3s ease-in-out;
+          right: 0;
+          bottom: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(0, 0, 0, 0.7);
+          opacity: 0;
+          transition: opacity 0.3s;
         }
         
-        .donate-btn:hover::before {
-          transform: scaleX(1);
-          transform-origin: left;
+        .causes-item:hover .causes-overlay {
+          opacity: 1;
+        }
+        
+        .btn {
+          display: inline-block;
+          font-weight: 400;
+          line-height: 1.5;
+          color: #212529;
+          text-align: center;
+          text-decoration: none;
+          vertical-align: middle;
+          cursor: pointer;
+          user-select: none;
+          background-color: transparent;
+          border: 1px solid transparent;
+          padding: 0.375rem 0.75rem;
+          font-size: 1rem;
+          border-radius: 0.25rem;
+          transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        
+        .btn-outline-primary {
+          color: white;
+          border-color: white;
+          border-width: 2px;
+          display: flex;
+          align-items: center;
+        }
+        
+        .btn-outline-primary:hover {
+          color: #f97316;
+          background-color: white;
+        }
+        
+        .btn-sm-square {
+          width: 24px;
+          height: 24px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .rounded-circle {
+          border-radius: 50%;
+        }
+        
+        .ms-2 {
+          margin-left: 0.5rem;
+        }
+        
+        /* Animation for fadeInUp */
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translate3d(0, 30px, 0);
+          }
+          to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+          }
+        }
+        
+        .wow.fadeInUp {
+          animation: fadeInUp 1s;
+        }
+        
+        /* Line clamp for description */
+        .line-clamp-2 {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
         }
       `}</style>
-    </Card>
+    </div>
   );
 }
