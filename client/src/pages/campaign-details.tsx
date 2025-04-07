@@ -13,9 +13,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { load } from '@cashfreepayments/cashfree-js';
-import { Play, Pause, Volume2, VolumeX } from "lucide-react";
+import {
+  Play, Pause, Volume2, VolumeX, Heart, CreditCard, Shield, Award, Users, Clock, CheckCircle2, Target, BarChart3, Calendar, ThumbsUp, Share2, Bookmark,
+  ArrowRight, Globe, Droplet, BookOpen, Leaf, Zap
+} from "lucide-react";
 
-
+declare global {
+  interface Window {
+    YT: any;
+    onYouTubeIframeAPIReady: () => void;
+  }
+}
 export default function CampaignDetails() {
   const { id } = useParams<{ id: string }>();
   const [_, navigate] = useLocation();
@@ -29,11 +37,11 @@ export default function CampaignDetails() {
   const [orderId, setOrderId] = useState("");
   const [cashfree, setCashfree] = useState<any>(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
-  
-   // Video player states
-   const videoRef = useRef<HTMLVideoElement>(null);
-   const [isPlaying, setIsPlaying] = useState(true);
-   const [isMuted, setIsMuted] = useState(true);
+
+  // Video player states
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [isMuted, setIsMuted] = useState(true);
 
   // Load Cashfree SDK
   useEffect(() => {
@@ -57,29 +65,97 @@ export default function CampaignDetails() {
     };
 
     initializeCashfree();
-    
+
     // Cleanup function
     return () => {
       // No specific cleanup needed for Cashfree SDK
     };
   }, [toast]);
-  
-  // Handle sticky donate button behavior
+
+  // Replace the existing useEffect for the sticky donate button with this:
   useEffect(() => {
     const handleScroll = () => {
       if (window.innerWidth < 1024) { // Only show on mobile and tablet
-        setShowStickyDonate(window.scrollY > 300);
+        // Remove the scroll check and always show on mobile/tablet
+        setShowStickyDonate(true);
       } else {
         setShowStickyDonate(false);
       }
     };
-    
+
     window.addEventListener('scroll', handleScroll);
     // Run once on mount to set initial state
     handleScroll();
-    
+
+    // Also run when window is resized
+    window.addEventListener('resize', handleScroll);
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, []);
+
+
+  // Add a state for the YouTube player
+  const [youtubePlayer, setYoutubePlayer] = useState<any>(null);
+  const youtubePlayerRef = useRef<HTMLDivElement>(null);
+
+  // Load YouTube API and initialize player
+  useEffect(() => {
+    // Load the YouTube IFrame Player API code asynchronously
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+    // Create YouTube player when API is ready
+    const initializeYouTubePlayer = () => {
+      if (!youtubePlayerRef.current) return;
+
+      const player = new window.YT.Player(youtubePlayerRef.current, {
+        videoId: 'PLRgoYpiLUE', // The video ID from your YouTube URL
+        playerVars: {
+          autoplay: 1,
+          mute: 1,
+          controls: 0,
+          showinfo: 0,
+          rel: 0,
+          modestbranding: 1,
+          playsinline: 1,
+        },
+        events: {
+          onReady: (event: any) => {
+            setYoutubePlayer(event.target);
+            setIsPlaying(true);
+            setIsMuted(true);
+          },
+          onStateChange: (event: any) => {
+            // Update playing state based on player state
+            if (event.data === window.YT.PlayerState.PLAYING) {
+              setIsPlaying(true);
+            } else if (event.data === window.YT.PlayerState.PAUSED ||
+              event.data === window.YT.PlayerState.ENDED) {
+              setIsPlaying(false);
+            }
+          }
+        }
+      });
+    };
+
+    // Define the callback for when the YouTube API is ready
+    window.onYouTubeIframeAPIReady = initializeYouTubePlayer;
+
+    // If the API is already loaded, initialize the player directly
+    if (window.YT && window.YT.Player) {
+      initializeYouTubePlayer();
+    }
+
+    // Cleanup function
+    return () => {
+      if (youtubePlayer) {
+        youtubePlayer.destroy();
+      }
     };
   }, []);
 
@@ -100,57 +176,66 @@ export default function CampaignDetails() {
     }
   });
 
-// Function to initialize Cashfree payment
-const initializePayment = (sessionId: string, donationId: string) => {
-  if (!cashfreeLoaded || !cashfree) {
-    toast({
-      title: "Payment gateway not ready",
-      description: "Please try again in a moment.",
-      variant: "destructive",
-    });
-    setIsProcessingPayment(false);
-    return;
-  }
-  
-  try {
-    console.log("Initializing payment with session ID:", sessionId);
-    
-    // Define the return URL for redirect after payment
-    const returnUrl = `${window.location.origin}/thank-you?donation_id=${donationId}&order_id=${orderId}`;
-    console.log("Return URL:", returnUrl);
-    
-    const checkoutOptions = {
-      paymentSessionId: sessionId,
-      redirectTarget: "_self", // Changed from "_modal" to "_self" for better redirect handling
-      onSuccess: (data: any) => {
-        console.log("Payment successful:", data);
-        // This may not be called if redirectTarget is "_self"
-        navigate(`/thank-you?donation_id=${donationId}&order_id=${orderId}`);
-      },
-      onFailure: (data: any) => {
-        console.error("Payment failed:", data);
+  // Function to initialize Cashfree payment
+  const initializePayment = (sessionId: string, donationId: string) => {
+    if (!cashfreeLoaded || !cashfree) {
+      toast({
+        title: "Payment gateway not ready",
+        description: "Please try again in a moment.",
+        variant: "destructive",
+      });
+      setIsProcessingPayment(false);
+      return;
+    }
+
+    try {
+      console.log("Initializing payment with session ID:", sessionId);
+
+      // Define the return URL for redirect after payment
+      const returnUrl = `${window.location.origin}/thank-you?donation_id=${donationId}&order_id=${orderId}`;
+      console.log("Return URL:", returnUrl);
+
+      const checkoutOptions = {
+        paymentSessionId: sessionId,
+        redirectTarget: "_self", // Changed from "_modal" to "_self" for better redirect handling
+        onSuccess: (data: any) => {
+          console.log("Payment successful:", data);
+          // This may not be called if redirectTarget is "_self"
+          navigate(`/thank-you?donation_id=${donationId}&order_id=${orderId}`);
+        },
+        onFailure: (data: any) => {
+          console.error("Payment failed:", data);
+          setIsProcessingPayment(false);
+          toast({
+            title: "Payment failed",
+            description: data.error?.message || "Failed to process payment. Please try again.",
+            variant: "destructive",
+          });
+        },
+        components: ["order-details", "card", "upi", "netbanking", "app", "wallet"],
+        style: {
+          backgroundColor: "#ffffff",
+          color: "#11111",
+          fontFamily: "Inter, sans-serif",
+          fontSize: "14px",
+          errorColor: "#ff0000",
+          theme: "light"
+        }
+      };
+
+      // Initialize Cashfree checkout
+      cashfree.checkout(checkoutOptions).then(() => {
+        console.log("Payment initialized successfully");
+      }).catch((error: any) => {
+        console.error("Error initializing payment:", error);
         setIsProcessingPayment(false);
         toast({
-          title: "Payment failed",
-          description: data.error?.message || "Failed to process payment. Please try again.",
+          title: "Payment error",
+          description: error.message || "Failed to initialize payment. Please try again.",
           variant: "destructive",
         });
-      },
-      components: ["order-details", "card", "upi", "netbanking", "app", "wallet"],
-      style: {
-        backgroundColor: "#ffffff",
-        color: "#11111",
-        fontFamily: "Inter, sans-serif",
-        fontSize: "14px",
-        errorColor: "#ff0000",
-        theme: "light"
-      }
-    };
-    
-    // Initialize Cashfree checkout
-    cashfree.checkout(checkoutOptions).then(() => {
-      console.log("Payment initialized successfully");
-    }).catch((error: any) => {
+      });
+    } catch (error: any) {
       console.error("Error initializing payment:", error);
       setIsProcessingPayment(false);
       toast({
@@ -158,17 +243,8 @@ const initializePayment = (sessionId: string, donationId: string) => {
         description: error.message || "Failed to initialize payment. Please try again.",
         variant: "destructive",
       });
-    });
-  } catch (error: any) {
-    console.error("Error initializing payment:", error);
-    setIsProcessingPayment(false);
-    toast({
-      title: "Payment error",
-      description: error.message || "Failed to initialize payment. Please try again.",
-      variant: "destructive",
-    });
-  }
-};
+    }
+  };
   // Function to handle payment verification
   const verifyPayment = async (donationId: string) => {
     try {
@@ -176,15 +252,15 @@ const initializePayment = (sessionId: string, donationId: string) => {
         console.error("Order ID is missing");
         return;
       }
-      
+
       setIsProcessingPayment(true);
       const verificationResponse = await apiRequest("POST", "/api/payment/verify", {
         orderId: orderId
       });
-      
-      if (verificationResponse.success && 
-          (verificationResponse.paymentStatus === "SUCCESS" || 
-           verificationResponse.paymentStatus === "PAID")) {
+
+      if (verificationResponse.success &&
+        (verificationResponse.paymentStatus === "SUCCESS" ||
+          verificationResponse.paymentStatus === "PAID")) {
         toast({
           title: "Payment successful",
           description: "Thank you for your donation!",
@@ -194,8 +270,8 @@ const initializePayment = (sessionId: string, donationId: string) => {
         toast({
           title: "Payment verification",
           description: `Payment status: ${verificationResponse.paymentStatus || "Unknown"}`,
-          variant: verificationResponse.paymentStatus === "SUCCESS" || verificationResponse.paymentStatus === "PAID" 
-            ? "default" 
+          variant: verificationResponse.paymentStatus === "SUCCESS" || verificationResponse.paymentStatus === "PAID"
+            ? "default"
             : "destructive",
         });
       }
@@ -211,85 +287,85 @@ const initializePayment = (sessionId: string, donationId: string) => {
     }
   };
 
-// Function to handle form submission
-async function onSubmit(data: DonationForm) {
-  // Check if Cashfree is loaded
-  if (cashfreeError) {
-    toast({
-      title: "Payment gateway error",
-      description: "Payment service is currently unavailable. Please try again later.",
-      variant: "destructive",
-    });
-    return;
-  }
-  
-  if (!cashfreeLoaded || !cashfree) {
-    toast({
-      title: "Payment gateway loading",
-      description: "Payment service is initializing. Please try again in a moment.",
-    });
-    return;
-  }
-  
-  // Set the final amount based on the selection type
-  const finalData = {
-    ...data,
-    amount: amountType === 'preset' ? presetAmount : data.amount
-  };
-  
-  // Add mobile field if it's not provided
-  if (!finalData.mobile) {
-    finalData.mobile = '';
-  }
-  
-  try {
-    setIsProcessingPayment(true);
-    
-    // First create the donation record
-    const donation = await apiRequest("POST", "/api/donations", finalData);
-    console.log("Donation created:", donation);
-    
-    // Then create the payment using our payments endpoint
-    const paymentResponse = await apiRequest("POST", "/api/payments", {
-      donationId: donation.id
-    });
-    console.log("Payment response:", paymentResponse);
-    
-    if (!paymentResponse.success) {
+  // Function to handle form submission
+  async function onSubmit(data: DonationForm) {
+    // Check if Cashfree is loaded
+    if (cashfreeError) {
       toast({
-        title: "Payment initialization failed",
-        description: "Could not create payment order. Please try again.",
+        title: "Payment gateway error",
+        description: "Payment service is currently unavailable. Please try again later.",
         variant: "destructive",
       });
-      setIsProcessingPayment(false);
       return;
     }
-    
-    // Store the order ID for verification later
-    setOrderId(paymentResponse.orderId);
-    
-    // Initialize payment with the session ID
-    if (paymentResponse.paymentSessionId) {
-      initializePayment(paymentResponse.paymentSessionId, donation.id);
-    } else {
-      console.error("Missing payment session ID in response:", paymentResponse);
+
+    if (!cashfreeLoaded || !cashfree) {
       toast({
-        title: "Payment initialization failed",
-        description: "Could not create payment session. Please try again.",
+        title: "Payment gateway loading",
+        description: "Payment service is initializing. Please try again in a moment.",
+      });
+      return;
+    }
+
+    // Set the final amount based on the selection type
+    const finalData = {
+      ...data,
+      amount: amountType === 'preset' ? presetAmount : data.amount
+    };
+
+    // Add mobile field if it's not provided
+    if (!finalData.mobile) {
+      finalData.mobile = '';
+    }
+
+    try {
+      setIsProcessingPayment(true);
+
+      // First create the donation record
+      const donation = await apiRequest("POST", "/api/donations", finalData);
+      console.log("Donation created:", donation);
+
+      // Then create the payment using our payments endpoint
+      const paymentResponse = await apiRequest("POST", "/api/payments", {
+        donationId: donation.id
+      });
+      console.log("Payment response:", paymentResponse);
+
+      if (!paymentResponse.success) {
+        toast({
+          title: "Payment initialization failed",
+          description: "Could not create payment order. Please try again.",
+          variant: "destructive",
+        });
+        setIsProcessingPayment(false);
+        return;
+      }
+
+      // Store the order ID for verification later
+      setOrderId(paymentResponse.orderId);
+
+      // Initialize payment with the session ID
+      if (paymentResponse.paymentSessionId) {
+        initializePayment(paymentResponse.paymentSessionId, donation.id);
+      } else {
+        console.error("Missing payment session ID in response:", paymentResponse);
+        toast({
+          title: "Payment initialization failed",
+          description: "Could not create payment session. Please try again.",
+          variant: "destructive",
+        });
+        setIsProcessingPayment(false);
+      }
+    } catch (error: any) {
+      console.error("Error processing donation:", error);
+      setIsProcessingPayment(false);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to process donation. Please try again.",
         variant: "destructive",
       });
-      setIsProcessingPayment(false);
     }
-  } catch (error: any) {
-    console.error("Error processing donation:", error);
-    setIsProcessingPayment(false);
-    toast({
-      title: "Error",
-      description: error.message || "Failed to process donation. Please try again.",
-      variant: "destructive",
-    });
   }
-}
 
   const handlePresetAmountClick = (amount: number) => {
     setAmountType('preset');
@@ -302,22 +378,26 @@ async function onSubmit(data: DonationForm) {
     form.setValue('amount', Number(e.target.value));
   };
 
-   // Video player functions
-   const togglePlay = () => {
-    if (videoRef.current) {
+  // Update the toggle functions to work with the YouTube player
+  const togglePlay = () => {
+    if (youtubePlayer) {
       if (isPlaying) {
-        videoRef.current.pause();
+        youtubePlayer.pauseVideo();
       } else {
-        videoRef.current.play();
+        youtubePlayer.playVideo();
       }
-      setIsPlaying(!isPlaying);
     }
   };
-  
+
   const toggleMute = () => {
-    if (videoRef.current) {
-      videoRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
+    if (youtubePlayer) {
+      if (isMuted) {
+        youtubePlayer.unMute();
+        setIsMuted(false);
+      } else {
+        youtubePlayer.mute();
+        setIsMuted(true);
+      }
     }
   };
 
@@ -379,341 +459,1092 @@ async function onSubmit(data: DonationForm) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-           {/* Campaign video player */}
+          {/* Campaign video player */}
+          <h1 className="text-3xl font-bold mb-3 text-slate-800">{campaign.title}</h1>
           <div className="video-container relative mb-6 rounded-lg overflow-hidden shadow-lg">
-          <video 
-  ref={videoRef}
-  className="video-player w-full h-auto"
-  poster={campaign.imageUrl}
-  onEnded={() => setIsPlaying(false)}
-  onLoadedData={() => {
-    if (videoRef.current) {
-      videoRef.current.play()
-        .catch(e => console.log("Autoplay prevented:", e));
-    }
-  }}
-  autoPlay
-  muted
->
-  <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4" />
-  Your browser does not support the video tag.
-</video>
-            <div className="video-overlay absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-100 hover:opacity-100 transition-opacity duration-300">
-              <div className="video-controls flex space-x-4">
-                <button 
-                                    className="video-btn bg-orange-500 hover:bg-orange-600 text-white p-3 rounded-full shadow-lg transition-transform duration-300 hover:scale-110" 
-                                    onClick={togglePlay} 
-                                    aria-label={isPlaying ? "Pause" : "Play"}
-                                  >
-                                    {isPlaying ? <Pause size={24} /> : <Play size={24} />}
-                                  </button>
-                                  <button 
-                                    className="video-btn bg-orange-500 hover:bg-orange-600 text-white p-3 rounded-full shadow-lg transition-transform duration-300 hover:scale-110" 
-                                    onClick={toggleMute} 
-                                    aria-label={isMuted ? "Unmute" : "Mute"}
-                                  >
-                                    {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                  
-                            <div className="mb-6">
-                              <div className="flex flex-wrap items-center gap-3 mb-4">
-                                <span className="px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800 border border-orange-200 shadow-sm">
-                                  {campaign.category}
-                                </span>
-                                <span className="text-slate-500 text-sm flex items-center">
-                                  <i className="bi bi-clock me-1"></i>{campaign.daysLeft} days left
-                                </span>
-                              </div>
-                              
-                              <h1 className="text-3xl font-bold mb-3 text-slate-800">{campaign.title}</h1>
-                              <p className="text-lg text-slate-600">{campaign.description}</p>
-                            </div>
-                            
-                            <div className="mb-6 bg-slate-50 p-4 rounded-lg shadow-sm">
-                              <div className="flex justify-between mb-2">
-                                <div className="text-2xl font-bold text-slate-800">₹{Number(campaign.raisedAmount).toLocaleString()}</div>
-                                <div className="text-slate-500">of ₹{Number(campaign.goalAmount).toLocaleString()} goal</div>
-                              </div>
-                              <div className="h-2.5 bg-slate-200 rounded-full mb-2">
-                                <div 
-                                  className="h-full bg-orange-500 rounded-full" 
-                                  style={{ width: `${percentFunded}%` }}
-                                ></div>
-                              </div>
-                              <div className="flex justify-between text-sm">
-                                <span className="text-slate-600 flex items-center">
-                                  <i className="bi bi-people-fill me-1"></i>{campaign.donorCount} donors
-                                </span>
-                                <span className="text-orange-600 font-medium">{percentFunded}% funded</span>
-                              </div>
-                            </div>
-                            
-                            <Tabs defaultValue="story" className="mb-8">
-                              <TabsList className="mb-2 bg-slate-100 p-1 rounded-lg">
-                                <TabsTrigger value="story" className="data-[state=active]:bg-white data-[state=active]:text-orange-600">Story</TabsTrigger>
-                                {/* <TabsTrigger value="updates" className="data-[state=active]:bg-white data-[state=active]:text-orange-600">Updates</TabsTrigger>
-                                <TabsTrigger value="comments" className="data-[state=active]:bg-white data-[state=active]:text-orange-600">Comments</TabsTrigger> */}
-                              </TabsList>
-                              
-                              <TabsContent value="story" className="p-4 bg-white rounded-md shadow-sm">
-                                <div dangerouslySetInnerHTML={{ __html: campaign.fullDescription }}></div>
-                                
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                                  <img 
-                                    src="https://images.unsplash.com/photo-1635236066069-cd6e699a8a2a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80" 
-                                    alt="Project impact" 
-                                    className="rounded-md shadow-sm hover:shadow-md transition-shadow duration-300"
-                                  />
-                                  <img 
-                                    src="https://images.unsplash.com/photo-1616628188859-7a11abb6fcc9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80" 
-                                    alt="Project impact" 
-                                    className="rounded-md shadow-sm hover:shadow-md transition-shadow duration-300"
-                                  />
-                                </div>
-                              </TabsContent>
-                              
-                              <TabsContent value="updates" className="p-4 bg-white rounded-md shadow-sm">
-                                <div className="border-b pb-4 mb-4">
-                                  <div className="flex mb-4">
-                                    <div className="flex-shrink-0 mr-3">
-                                      <div className="w-12 h-12 rounded-full bg-slate-300 overflow-hidden">
-                                        <img 
-                                          src="https://i.pravatar.cc/48?img=1"
-                                          alt="Project Coordinator"
-                                          className="w-full h-full object-cover"
-                                        />
-                                      </div>
-                                    </div>
-                                    <div>
-                                      <h4 className="font-bold mb-1">First village system installed!</h4>
-                                      <p className="text-sm text-slate-500 mb-3">Posted by Sarah Johnson, Project Coordinator • 3 days ago</p>
-                                      <p>We're thrilled to announce that we've successfully installed the first water purification system in Nyarugusu village! The system is already providing clean water to over 500 residents.</p>
-                                    </div>
-                                  </div>
-                                </div>
-                  
-                                <div>
-                                  <div className="flex">
-                                    <div className="flex-shrink-0 mr-3">
-                                      <div className="w-12 h-12 rounded-full bg-slate-300 overflow-hidden">
-                                        <img 
-                                          src="https://i.pravatar.cc/48?img=2"
-                                          alt="Project Director"
-                                          className="w-full h-full object-cover"
-                                        />
-                                      </div>
-                                    </div>
-                                    <div>
-                                      <h4 className="font-bold mb-1">Halfway to our goal!</h4>
-                                      <p className="text-sm text-slate-500 mb-3">Posted by Michael Chang, Project Director • 2 weeks ago</p>
-                                      <p>Thanks to your generous donations, we've reached 50% of our fundraising goal! This means we can begin ordering equipment for the next phase of installations.</p>
-                                    </div>
-                                  </div>
-                                </div>
-                              </TabsContent>
-                              
-                              <TabsContent value="comments" className="p-4 bg-white rounded-md shadow-sm">
-                                <div className="mb-6">
-                                  <div className="border-b pb-3 mb-3">
-                                    <div className="flex">
-                                      <div className="flex-shrink-0 mr-3">
-                                        <div className="w-10 h-10 rounded-full bg-slate-300 overflow-hidden">
-                                          <img 
-                                            src="https://i.pravatar.cc/40?img=3"
-                                            alt="Commenter"
-                                            className="w-full h-full object-cover"
-                                          />
-                                        </div>
-                                      </div>
-                                      <div>
-                                        <h5 className="font-bold text-sm mb-1">James Wilson</h5>
-                                        <p className="text-xs text-slate-500 mb-2">2 days ago</p>
-                                        <p className="text-sm">So happy to support this important cause. Clean water is a basic human right!</p>
-                                      </div>
-                                    </div>
-                                  </div>
-                  
-                                  <div className="border-b pb-3 mb-3">
-                                    <div className="flex">
-                                      <div className="flex-shrink-0 mr-3">
-                                        <div className="w-10 h-10 rounded-full bg-slate-300 overflow-hidden">
-                                          <img 
-                                            src="https://i.pravatar.cc/40?img=4"
-                                            alt="Commenter"
-                                            className="w-full h-full object-cover"
-                                          />
-                                        </div>
-                                      </div>
-                                      <div>
-                                        <h5 className="font-bold text-sm mb-1">Elena Rodriguez</h5>
-                                        <p className="text-xs text-slate-500 mb-2">5 days ago</p>
-                                        <p className="text-sm">I visited this region last year and saw the need firsthand. This initiative will make such a difference!</p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                  
-                                <div>
-                                  <h4 className="font-bold mb-3">Leave a Comment</h4>
-                                  <textarea 
-                                    className="w-full p-3 border border-slate-300 rounded-md mb-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                                    rows={3}
-                                    placeholder="Add your comment..."
-                                  ></textarea>
-                                  <Button className="bg-orange-500 hover:bg-orange-600 text-white">Post Comment</Button>
-                                </div>
-                              </TabsContent>
-                            </Tabs>
-                          </div>
-                          
-                          <div className="lg:col-span-1">
-                            <Card className="sticky top-24 border-0 shadow-md">
-                              <CardContent className="p-6">
-                                <h3 className="text-xl font-bold mb-6 text-center">Support This Campaign</h3>
-                                
-                                <Form {...form}>
-                                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                                    <FormField
-                                      control={form.control}
-                                      name="firstName"
-                                      render={({ field }) => (
-                                        <FormItem>
-                                          <FormLabel>First Name</FormLabel>
-                                          <FormControl>
-                                            <Input {...field} className="focus:ring-orange-500 focus:border-orange-500" />
-                                          </FormControl>
-                                          <FormMessage />
-                                        </FormItem>
-                                      )}
-                                    />
-                                    
-                                    <FormField
-                                      control={form.control}
-                                      name="lastName"
-                                      render={({ field }) => (
-                                        <FormItem>
-                                          <FormLabel>Last Name</FormLabel>
-                                          <FormControl>
-                                            <Input {...field} className="focus:ring-orange-500 focus:border-orange-500" />
-                                          </FormControl>
-                                          <FormMessage />
-                                        </FormItem>
-                                      )}
-                                    />
-                                    
-                                    <FormField
-                                      control={form.control}
-                                      name="email"
-                                      render={({ field }) => (
-                                        <FormItem>
-                                          <FormLabel>Email</FormLabel>
-                                          <FormControl>
-                                            <Input {...field} type="email" className="focus:ring-orange-500 focus:border-orange-500" />
-                                          </FormControl>
-                                          <FormMessage />
-                                        </FormItem>
-                                      )}
-                                    />
-                                    <FormField
-                                      control={form.control}
-                                      name="mobile"
-                                      render={({ field }) => (
-                                        <FormItem>
-                                          <FormLabel>Mobile Number</FormLabel>
-                                          <FormControl>
-                                            <Input 
-                                              {...field} 
-                                              type="tel" 
-                                              placeholder="+91 (XXX) XXX-XXXX"
-                                              className="focus:ring-orange-500 focus:border-orange-500"
-                                            />
-                                          </FormControl>
-                                          <FormMessage />
-                                        </FormItem>
-                                      )}
-                                    />
-                                    <div>
-                                      <FormLabel>Donation Amount</FormLabel>
-                                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
-                                        {[25, 50, 100, 250].map((amount) => (
-                                          <div 
-                                            key={amount}
-                                            onClick={() => handlePresetAmountClick(amount)}
-                                            className={`cursor-pointer px-4 py-2 border rounded-md text-center 
-                                              ${amountType === 'preset' && presetAmount === amount
-                                                ? 'border-orange-500 bg-orange-50 text-orange-600'
-                                                : 'border-slate-200 hover:border-orange-500 hover:bg-orange-50'
-                                              }`
-                                            }
-                                          >
-                                            ₹{amount}
-                                          </div>
-                                        ))}
-                                      </div>
-                                      
-                                      <div className="flex">
-                                        <span className="inline-flex items-center px-3 bg-slate-100 border border-r-0 border-slate-300 rounded-l-md">
-                                          ₹
-                                        </span>
-                                        <input
-                                          type="number"
-                                          className={`flex-1 p-2 border rounded-r-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500
-                                            ${amountType === 'custom' ? 'border-orange-500' : 'border-slate-300'}`
-                                          }
-                                          placeholder="Other amount"
-                                          min="1"
-                                          onChange={handleCustomAmountChange}
-                                        />
-                                      </div>
-                                      {form.formState.errors.amount && (
-                                        <p className="text-sm text-red-500 mt-1">{form.formState.errors.amount.message}</p>
-                                      )}
-                                    </div>
-                                    
-                                    <Button 
-                                      type="submit" 
-                                      className="w-full py-6 text-lg bg-orange-500 hover:bg-orange-600 text-white transition-all duration-300 hover:shadow-lg hover:shadow-orange-200" 
-                                      disabled={isProcessingPayment}
-                                    >
-                                      {isProcessingPayment ? "Processing..." : "Donate Now"} 
-                                      <i className="bi bi-arrow-right ms-2"></i>
-                                    </Button>
-                                    
-                                    <div className="text-center mt-3">
-                                      <p className="text-xs text-slate-500">
-                                        <i className="bi bi-shield-lock me-1"></i> Your payment information is secure
-                                      </p>
-                                    </div>
-                                  </form>
-                                </Form>
-                              </CardContent>
-                            </Card>
-                          </div>
+            <iframe
+              src="https://www.youtube.com/embed/PLRgoYpiLUE?autoplay=1&mute=1&controls=1"
+              className="video-player w-full h-full absolute top-0 left-0"
+              title="Campaign Video"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
+
+
+            {/* Updated YouTube video player */}
+            <div className="video-container relative mb-6 rounded-lg overflow-hidden shadow-lg">
+              {/* YouTube player container */}
+              <div ref={youtubePlayerRef} className="video-player w-full h-full absolute top-0 left-0"></div>
+
+              {/* Custom overlay for controls */}
+              <div className="video-overlay absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300">
+                <div className="video-controls flex space-x-4">
+                  <button
+                    className="video-btn bg-orange-500 hover:bg-orange-600 text-white p-3 rounded-full shadow-lg transition-transform duration-300 hover:scale-110"
+                    onClick={togglePlay}
+                    aria-label={isPlaying ? "Pause" : "Play"}
+                  >
+                    {isPlaying ? <Pause size={24} /> : <Play size={24} />}
+                  </button>
+                  <button
+                    className="video-btn bg-orange-500 hover:bg-orange-600 text-white p-3 rounded-full shadow-lg transition-transform duration-300 hover:scale-110"
+                    onClick={toggleMute}
+                    aria-label={isMuted ? "Unmute" : "Mute"}
+                  >
+                    {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
+                  </button>
+
+                </div>
+              </div>
+            </div></div>
+
+          {/* Campaign details */}
+
+          <div className="mb-6">
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              <span className="px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800 border border-orange-200 shadow-sm flex items-center">
+                {campaign.category === "Environment" && <Leaf className="mr-1" size={14} />}
+                {campaign.category === "Education" && <BookOpen className="mr-1" size={14} />}
+                {campaign.category === "Healthcare" && <Droplet className="mr-1" size={14} />}
+                {campaign.category}
+              </span>
+              <span className="text-slate-500 text-sm flex items-center">
+                <Clock className="mr-1" size={14} />
+                {campaign.daysLeft} days left
+              </span>
+              <div className="ml-auto flex space-x-2">
+                {/* <button className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors">
+                  <Share2 size={16} className="text-slate-600" />
+                </button> */}
+                {/* <button className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors">
+                  <Bookmark size={16} className="text-slate-600" />
+                </button> */}
+              </div>
+            </div>
+
+            <p className="text-lg text-slate-600 mb-4">{campaign.description}</p>
+
+            <div className="flex flex-wrap gap-4 mb-4">
+              <div className="flex items-center text-sm text-slate-600">
+                <Globe className="mr-1" size={16} />
+                <span>Impact: Global</span>
+              </div>
+              <div className="flex items-center text-sm text-slate-600">
+                <Users className="mr-1" size={16} />
+                <span>Beneficiaries: 7,500+</span>
+              </div>
+              <div className="flex items-center text-sm text-slate-600">
+                <Zap className="mr-1" size={16} />
+                <span>Urgent Need</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Campaign progress - replace the existing section */}
+          <div className="mb-6 bg-white p-5 rounded-lg shadow-sm border border-slate-100">
+            <div className="flex justify-between mb-2">
+              <div className="flex items-center">
+                <Target className="text-orange-500 mr-2" size={24} />
+                <div>
+                  <div className="text-2xl font-bold text-slate-800">₹{Number(campaign.raisedAmount).toLocaleString()}</div>
+                  <div className="text-sm text-slate-500">raised of ₹{Number(campaign.goalAmount).toLocaleString()} goal</div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-xl font-bold text-orange-600">{percentFunded}%</div>
+                <div className="text-sm text-slate-500">funded</div>
+              </div>
+            </div>
+
+            <div className="h-3 bg-slate-100 rounded-full mb-3 overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-orange-400 to-orange-600 rounded-full"
+                style={{ width: `${percentFunded}%` }}
+              ></div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="bg-slate-50 p-2 rounded-md">
+                <div className="text-sm text-slate-500">Donors</div>
+                <div className="font-bold text-slate-700 flex items-center justify-center">
+                  <Users className="mr-1" size={14} />
+                  {campaign.donorCount}
+                </div>
+              </div>
+              <div className="bg-slate-50 p-2 rounded-md">
+                <div className="text-sm text-slate-500">Days Left</div>
+                <div className="font-bold text-slate-700 flex items-center justify-center">
+                  <Calendar className="mr-1" size={14} />
+                  {campaign.daysLeft}
+                </div>
+              </div>
+              <div className="bg-slate-50 p-2 rounded-md">
+                <div className="text-sm text-slate-500">Avg. Donation</div>
+                <div className="font-bold text-slate-700 flex items-center justify-center">
+                  <BarChart3 className="mr-1" size={14} />
+                  ₹{campaign.donorCount ? Math.round(campaign.raisedAmount / campaign.donorCount) : 0}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 flex justify-center">
+              <div className="inline-flex items-center px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium">
+                <ThumbsUp className="mr-1" size={12} />
+                {campaign.donorCount > 10 ? "Trending Campaign" : "Active Campaign"}
+              </div>
+            </div>
+          </div>
+
+          {/* Campaign updates */}
+          <Tabs defaultValue="story" className="mb-8">
+            <TabsList className="mb-2 bg-slate-100 p-1 rounded-lg">
+              <TabsTrigger value="story" className="data-[state=active]:bg-white data-[state=active]:text-orange-600">
+                <BookOpen className="mr-1" size={14} />
+                Story
+              </TabsTrigger>
+              <TabsTrigger value="gallery" className="data-[state=active]:bg-white data-[state=active]:text-orange-600">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Gallery
+              </TabsTrigger>
+              <TabsTrigger value="timeline" className="data-[state=active]:bg-white data-[state=active]:text-orange-600">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                Timeline
+              </TabsTrigger>
+            </TabsList>
+            {/* Story Tab*/}
+            <TabsContent value="story" className="p-5 bg-white rounded-md shadow-sm">
+              <div className="prose prose-slate max-w-none">
+                {/* Hero section with impact badge */}
+                <div className="relative mb-6">
+                  <div className="absolute -top-2 -right-2 bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-md flex items-center">
+                    <Award className="mr-1" size={14} />
+                    High Impact Project
+                  </div>
+                  <div className="bg-gradient-to-r from-slate-50 to-orange-50 p-5 rounded-lg border border-orange-100">
+                    <h3 className="text-xl font-bold text-slate-800 flex items-center mb-3">
+                      <Target className="mr-2 text-orange-500" size={20} />
+                      Our Mission
+                    </h3>
+                    <p className="text-slate-700">
+                      {campaign.description} This initiative aims to create lasting change through sustainable solutions and community involvement.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Main content with enhanced formatting */}
+                <div dangerouslySetInnerHTML={{ __html: campaign.fullDescription }}></div>
+
+                {/* Key highlights section */}
+                <div className="my-8">
+                  <h3 className="text-xl font-bold text-slate-800 flex items-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Key Highlights
+                  </h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 flex">
+                      <div className="bg-green-100 p-2 rounded-full h-fit">
+                        <Droplet className="text-green-600" size={20} />
+                      </div>
+                      <div className="ml-3">
+                        <h4 className="font-semibold text-slate-800">Clean Water Access</h4>
+                        <p className="text-sm text-slate-600">Providing 7,500+ people with access to clean, safe drinking water through sustainable filtration systems.</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 flex">
+                      <div className="bg-blue-100 p-2 rounded-full h-fit">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                      </div>
+                      <div className="ml-3">
+                        <h4 className="font-semibold text-slate-800">Health Improvement</h4>
+                        <p className="text-sm text-slate-600">Reducing waterborne diseases by 80% in communities where our systems are installed.</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 flex">
+                      <div className="bg-purple-100 p-2 rounded-full h-fit">
+                        <Users className="text-purple-600" size={20} />
+                      </div>
+                      <div className="ml-3">
+                        <h4 className="font-semibold text-slate-800">Community Training</h4>
+                        <p className="text-sm text-slate-600">Training local community members to maintain systems, ensuring long-term sustainability.</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 flex">
+                      <div className="bg-yellow-100 p-2 rounded-full h-fit">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div className="ml-3">
+                        <h4 className="font-semibold text-slate-800">Long-term Impact</h4>
+                        <p className="text-sm text-slate-600">Each system has a 10+ year lifespan with proper maintenance, providing lasting benefits.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Testimonial section */}
+                <div className="my-8 bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-lg border border-blue-100">
+                  <h3 className="text-xl font-bold text-slate-800 flex items-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                    </svg>
+                    Community Voices
+                  </h3>
+
+                  <div className="bg-white p-4 rounded-lg shadow-sm mb-4">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 mr-4">
+                        <img
+                          src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&h=100&q=80"
+                          alt="Community member"
+                          className="w-14 h-14 rounded-full object-cover border-2 border-blue-200"
+                        />
+                      </div>
+                      <div>
+                        <div className="flex items-center mb-1">
+                          <h4 className="font-bold text-slate-800">Maria Nkosi</h4>
+                          <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">Village Elder</span>
                         </div>
-                        
-                        {/* Sticky donate button for mobile */}
-                        {showStickyDonate && (
-                          <div className="sticky-donate-btn fixed bottom-0 left-0 right-0 bg-white shadow-lg p-3 z-50 lg:hidden">
-                            <Button 
-                              className="w-full py-4 text-lg bg-orange-500 hover:bg-orange-600 text-white transition-all duration-300" 
-                              onClick={() => {
-                                // Scroll to the donation form section
-                                const donationForm = document.querySelector('.lg\\:col-span-1');
-                                if (donationForm) {
-                                  donationForm.scrollIntoView({ behavior: 'smooth' });
-                                }
-                              }}
-                            >
-                              Donate Now <i className="bi bi-arrow-right ms-2"></i>
-                            </Button>
-                          </div>
-                        )}
-                  
-                        {/* Add CSS for styling */}
-                        <style jsx="true" global="true">{`
+                        <p className="text-slate-600 italic mb-2">
+                          "Before this project, I had to walk 3 kilometers every day to fetch water that wasn't even clean. Now, we have safe water right in our village. My children are healthier, and I have more time for other activities."
+                        </p>
+                        <div className="flex">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <svg key={star} xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white p-4 rounded-lg shadow-sm">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 mr-4">
+                        <img
+                          src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&h=100&q=80"
+                          alt="Community member"
+                          className="w-14 h-14 rounded-full object-cover border-2 border-blue-200"
+                        />
+                      </div>
+                      <div>
+                        <div className="flex items-center mb-1">
+                          <h4 className="font-bold text-slate-800">Joseph Mwangi</h4>
+                          <span className="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">System Technician</span>
+                        </div>
+                        <p className="text-slate-600 italic mb-2">
+                          "I've been trained to maintain our water system, and it's given me valuable skills and a sense of purpose. Our community is healthier now, and I'm proud to be part of the solution."
+                        </p>
+                        <div className="flex">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <svg key={star} xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Commitment section */}
+                <div className="bg-orange-50 border border-orange-100 rounded-lg p-4 my-6">
+                  <h4 className="text-orange-800 font-semibold flex items-center mb-2">
+                    <Award className="mr-2" size={18} />
+                    Our Commitment
+                  </h4>
+                  <p className="text-orange-700 text-sm">
+                    We are committed to transparency and accountability. All funds raised will be used directly for the stated purpose, and we'll provide regular updates on the project's progress.
+                  </p>
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                      </svg>
+                      Verified
+                    </span>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                      </svg>
+                      Transparent
+                    </span>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
+                      Secure
+                    </span>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Sustainable
+                    </span>
+                  </div>
+                </div>
+
+                {/* Project impact with images in a grid */}
+                <h3 className="font-bold text-xl mt-8 mb-4 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Project Impact
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                  <div className="relative group">
+                    <img
+                      src="https://images.unsplash.com/photo-1635236066069-cd6e699a8a2a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80"
+                      alt="Clean water source"
+                      className="rounded-md shadow-sm group-hover:shadow-md transition-shadow duration-300 w-full h-64 object-cover"
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                      <h4 className="text-white font-semibold">Clean Water Source</h4>
+                      <p className="text-white/80 text-sm">Newly installed water purification system</p>
+                    </div>
+                  </div>
+                  <div className="relative group">
+                    <img
+                      src="https://images.unsplash.com/photo-1616628188859-7a11abb6fcc9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80"
+                      alt="Community gathering"
+                      className="rounded-md shadow-sm group-hover:shadow-md transition-shadow duration-300 w-full h-64 object-cover"
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                      <h4 className="text-white font-semibold">Community Gathering</h4>
+                      <p className="text-white/80 text-sm">Local residents celebrating access to clean water</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                  <div className="relative group">
+                    <img
+                      src="https://images.unsplash.com/photo-1551734413-5943d61e982f?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80"
+                      alt="Children at school"
+                      className="rounded-md shadow-sm group-hover:shadow-md transition-shadow duration-300 w-full h-48 object-cover"
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                      <h4 className="text-white font-semibold text-sm">Education Impact</h4>
+                      <p className="text-white/80 text-xs">Children attending school regularly now</p>
+                    </div>
+                  </div>
+                  <div className="relative group">
+                    <img
+                      src="https://images.unsplash.com/photo-1527613426441-4da17471b66d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80"
+                      alt="Water testing"
+                      className="rounded-md shadow-sm group-hover:shadow-md transition-shadow duration-300 w-full h-48 object-cover"
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                      <h4 className="text-white font-semibold text-sm">Water Quality Testing</h4>
+                      <p className="text-white/80 text-xs">Regular monitoring ensures safety</p>
+                    </div>
+                  </div>
+                  <div className="relative group">
+                    <img
+                      src="https://images.unsplash.com/photo-1541252260730-0412e8e2108e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80"
+                      alt="System installation"
+                      className="rounded-md shadow-sm group-hover:shadow-md transition-shadow duration-300 w-full h-48 object-cover"
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                      <h4 className="text-white font-semibold text-sm">System Installation</h4>
+                      <p className="text-white/80 text-xs">Local technicians being trained</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Statistics section */}
+                <div className="bg-slate-50 p-5 rounded-lg border border-slate-200 mb-8">
+                  <h3 className="font-bold text-xl mb-4 flex items-center">
+                    <BarChart3 className="mr-2 text-slate-700" size={20} />
+                    Project Statistics
+                  </h3>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-white p-4 rounded-md shadow-sm text-center">
+                      <div className="text-3xl font-bold text-orange-500 mb-1">15</div>
+                      <div className="text-sm text-slate-600">Villages Targeted</div>
+                    </div>
+                    <div className="bg-white p-4 rounded-md shadow-sm text-center">
+                      <div className="text-3xl font-bold text-orange-500 mb-1">7,500+</div>
+                      <div className="text-sm text-slate-600">People Impacted</div>
+                    </div>
+                    <div className="bg-white p-4 rounded-md shadow-sm text-center">
+                      <div className="text-3xl font-bold text-orange-500 mb-1">80%</div>
+                      <div className="text-sm text-slate-600">Disease Reduction</div>
+                    </div>
+                    <div className="bg-white p-4 rounded-md shadow-sm text-center">
+                      <div className="text-3xl font-bold text-orange-500 mb-1">10+ yrs</div>
+                      <div className="text-sm text-slate-600">System Lifespan</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* How your donation helps section */}
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-lg border border-blue-100 mb-8">
+                  <h3 className="font-bold text-xl mb-4 flex items-center">
+                    <Heart className="mr-2 text-red-500" size={20} />
+                    How Your Donation Helps
+                  </h3>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center">
+                      <div className="bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm mr-3 flex-shrink-0">
+                        <span className="text-orange-500 font-bold">₹25</span>
+                      </div>
+                      <div className="text-slate-700">Provides clean water to one person for a month</div>
+                    </div>
+
+                    <div className="flex items-center">
+                      <div className="bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm mr-3 flex-shrink-0">
+                        <span className="text-orange-500 font-bold">₹100</span>
+                      </div>
+                      <div className="text-slate-700">Funds water quality testing for an entire community</div>
+                    </div>
+
+                    <div className="flex items-center">
+                      <div className="bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm mr-3 flex-shrink-0">
+                        <span className="text-orange-500 font-bold">₹250</span>
+                      </div>
+                      <div className="text-slate-700">Provides clean water to one person for a year</div>
+                    </div>
+
+                    <div className="flex items-center">
+                      <div className="bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm mr-3 flex-shrink-0">
+                        <span className="text-orange-500 font-bold">₹500</span>
+                      </div>
+                      <div className="text-slate-700">Contributes to a community water purification system</div>
+                    </div>
+
+                    <div className="flex items-center">
+                      <div className="bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm mr-3 flex-shrink-0">
+                        <span className="text-orange-500 font-bold">₹1000</span>
+                      </div>
+                      <div className="text-slate-700">Sponsors a complete water access point for a village</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Call to action */}
+                <div className="bg-orange-500 text-white p-6 rounded-lg shadow-lg mb-4">
+                  <div className="flex flex-col md:flex-row items-center justify-between">
+                    <div className="mb-4 md:mb-0">
+                      <h3 className="text-xl font-bold mb-2 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Urgent Need
+                      </h3>
+                      <p className="text-orange-100">
+                        We need your support to reach our goal. Every donation brings us closer to providing clean water to all 15 villages.
+                      </p>
+                    </div>
+                    <Button
+                      className="bg-white text-orange-600 hover:bg-orange-50 shadow-md"
+                      onClick={() => {
+                        // Scroll to the donation form section
+                        const donationForm = document.querySelector('.lg\\:col-span-1');
+                        if (donationForm) {
+                          donationForm.scrollIntoView({ behavior: 'smooth' });
+                        }
+                      }}
+                    >
+                      Donate Now
+                      <ArrowRight className="ml-2" size={16} />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* FAQ section */}
+                <div className="mt-8 mb-4">
+                  <h3 className="font-bold text-xl mb-4 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Frequently Asked Questions
+                  </h3>
+
+                  <div className="space-y-4">
+                    <div className="bg-white p-4 rounded-md shadow-sm border border-slate-200">
+                      <h4 className="font-semibold text-slate-800 mb-2">How long does it take to install a system?</h4>
+                      <p className="text-slate-600 text-sm">
+                        Each water purification system takes approximately 2-3 weeks to install, including site preparation, installation, testing, and community training. We work closely with local communities throughout the process.
+                      </p>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-md shadow-sm border border-slate-200">
+                      <h4 className="font-semibold text-slate-800 mb-2">Can I visit the project sites?</h4>
+                      <p className="text-slate-600 text-sm">
+                        Yes! We organize donor visits twice a year. These trips allow you to see the impact of your donations firsthand and meet the communities benefiting from the clean water systems. Contact us for more information.
+                      </p>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-md shadow-sm border border-slate-200">
+                      <h4 className="font-semibold text-slate-800 mb-2">Is my donation tax-deductible?</h4>
+                      <p className="text-slate-600 text-sm">
+                        Yes, all donations are tax-deductible as allowed by law. You will receive a receipt for your donation that can be used for tax purposes.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Team section */}
+                <div className="mt-8 mb-4">
+                  <h3 className="font-bold text-xl mb-4 flex items-center">
+                    <Users className="mr-2 text-slate-700" size={20} />
+                    Meet Our Team
+                  </h3>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="bg-white p-4 rounded-md shadow-sm border border-slate-200 text-center">
+                      <img
+                        src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&h=150&q=80"
+                        alt="Team member"
+                        className="w-24 h-24 rounded-full mx-auto mb-3 object-cover border-2 border-orange-200"
+                      />
+                      <h4 className="font-semibold text-slate-800">Dr. Sarah Johnson</h4>
+                      <p className="text-orange-600 text-sm mb-2">Project Director</p>
+                      <p className="text-slate-600 text-sm">
+                        Water resource specialist with 15+ years of experience in sustainable water solutions.
+                      </p>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-md shadow-sm border border-slate-200 text-center">
+                      <img
+                        src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&h=150&q=80"
+                        alt="Team member"
+                        className="w-24 h-24 rounded-full mx-auto mb-3 object-cover border-2 border-orange-200"
+                      />
+                      <h4 className="font-semibold text-slate-800">Michael Chang</h4>
+                      <p className="text-orange-600 text-sm mb-2">Engineering Lead</p>
+                      <p className="text-slate-600 text-sm">
+                        Environmental engineer specializing in water purification systems for rural communities.
+                      </p>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-md shadow-sm border border-slate-200 text-center">
+                      <img
+                        src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&h=150&q=80"
+                        alt="Team member"
+                        className="w-24 h-24 rounded-full mx-auto mb-3 object-cover border-2 border-orange-200"
+                      />
+                      <h4 className="font-semibold text-slate-800">Amara Okafor</h4>
+                      <p className="text-orange-600 text-sm mb-2">Community Liaison</p>
+                      <p className="text-slate-600 text-sm">
+                        Works directly with local communities to ensure project sustainability and community ownership.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Partners section */}
+                <div className="mt-8 mb-4">
+                  <h3 className="font-bold text-xl mb-4 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    Our Partners
+                  </h3>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-white p-4 rounded-md shadow-sm border border-slate-200 flex items-center justify-center h-24">
+                      <div className="text-center">
+                        <div className="font-semibold text-slate-800">WaterAid</div>
+                        <div className="text-xs text-slate-500">Technical Partner</div>
+                      </div>
+                    </div>
+                    <div className="bg-white p-4 rounded-md shadow-sm border border-slate-200 flex items-center justify-center h-24">
+                      <div className="text-center">
+                        <div className="font-semibold text-slate-800">EcoSolutions</div>
+                        <div className="text-xs text-slate-500">Equipment Provider</div>
+                      </div>
+                    </div>
+                    <div className="bg-white p-4 rounded-md shadow-sm border border-slate-200 flex items-center justify-center h-24">
+                      <div className="text-center">
+                        <div className="font-semibold text-slate-800">Global Health</div>
+                        <div className="text-xs text-slate-500">Health Assessment</div>
+                      </div>
+                    </div>
+                    <div className="bg-white p-4 rounded-md shadow-sm border border-slate-200 flex items-center justify-center h-24">
+                      <div className="text-center">
+                        <div className="font-semibold text-slate-800">Local Gov't</div>
+                        <div className="text-xs text-slate-500">Regional Support</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Final call to action with emoji */}
+                <div className="mt-8 bg-gradient-to-r from-orange-500 to-orange-600 text-white p-6 rounded-lg shadow-lg text-center">
+                  <div className="text-4xl mb-3">💧</div>
+                  <h3 className="text-xl font-bold mb-2">Be Part of the Solution</h3>
+                  <p className="text-orange-100 mb-4">
+                    Your donation today will help bring clean water to communities in need. Join us in making a difference!
+                  </p>
+                  <Button
+                    className="bg-white text-orange-600 hover:bg-orange-50 shadow-md"
+                    onClick={() => {
+                      // Scroll to the donation form section
+                      const donationForm = document.querySelector('.lg\\:col-span-1');
+                      if (donationForm) {
+                        donationForm.scrollIntoView({ behavior: 'smooth' });
+                      }
+                    }}
+                  >
+                    Donate Now
+                    <ArrowRight className="ml-2" size={16} />
+                  </Button>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="gallery" className="p-5 bg-white rounded-md shadow-sm">
+              <h3 className="font-bold text-xl mb-4 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Project Gallery
+              </h3>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div className="aspect-square overflow-hidden rounded-md shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02]">
+                  <img
+                    src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=300&q=80"
+                    alt="Project"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="aspect-square overflow-hidden rounded-md shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02]">
+                  <img
+                    src="https://images.unsplash.com/photo-1593526613712-7b4b8c90d0a7?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=300&q=80"
+                    alt="Project"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="aspect-square overflow-hidden rounded-md shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02]">
+                  <img
+                    src="https://images.unsplash.com/photo-1576502200916-3808e07386a5?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=300&q=80"
+                    alt="Project"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="aspect-square overflow-hidden rounded-md shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02]">
+                  <img
+                    src="https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=300&q=80"
+                    alt="Project"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="aspect-square overflow-hidden rounded-md shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02]">
+                  <img
+                    src="https://images.unsplash.com/photo-1594708767771-a5f97143529a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=300&q=80"
+                    alt="Project"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="aspect-square overflow-hidden rounded-md shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02]">
+                  <img
+                    src="https://images.unsplash.com/photo-1593113598332-cd59a93333c3?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=300&q=80"
+                    alt="Project"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+
+
+            </TabsContent>
+            <TabsContent value="timeline" className="p-5 bg-white rounded-md shadow-sm">
+              <h3 className="font-bold text-xl mb-4 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                Project Timeline
+              </h3>
+
+              <div className="space-y-6">
+                {/* Timeline item 1 */}
+                <div className="relative pl-8 pb-6 border-l-2 border-orange-200">
+                  <div className="absolute left-[-8px] top-0 bg-orange-500 w-4 h-4 rounded-full"></div>
+                  <div className="bg-orange-50 rounded-lg p-4">
+                    <div className="flex items-center mb-2">
+                      <Calendar className="text-orange-600 mr-2" size={16} />
+                      <span className="text-sm text-orange-800 font-medium">June 15, 2023</span>
+                      <span className="ml-auto px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Completed</span>
+                    </div>
+                    <h4 className="font-bold text-slate-800 mb-2">Project Launch</h4>
+                    <p className="text-sm text-slate-600">We officially launched our campaign with an initial assessment of the target communities and their specific needs.</p>
+                    <img
+                      src="https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80"
+                      alt="Project Launch"
+                      className="mt-3 rounded-md w-full h-40 object-cover"
+                    />
+                  </div>
+                </div>
+
+                {/* Timeline item 2 */}
+                <div className="relative pl-8 pb-6 border-l-2 border-orange-200">
+                  <div className="absolute left-[-8px] top-0 bg-orange-500 w-4 h-4 rounded-full"></div>
+                  <div className="bg-orange-50 rounded-lg p-4">
+                    <div className="flex items-center mb-2">
+                      <Calendar className="text-orange-600 mr-2" size={16} />
+                      <span className="text-sm text-orange-800 font-medium">August 3, 2023</span>
+                      <span className="ml-auto px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Completed</span>
+                    </div>
+                    <h4 className="font-bold text-slate-800 mb-2">First Installation Complete</h4>
+                    <p className="text-sm text-slate-600">Successfully installed the first water purification system in Nyarugusu village, providing clean water to over 500 residents.</p>
+                    <div className="grid grid-cols-2 gap-2 mt-3">
+                      <img
+                        src="https://images.unsplash.com/photo-1541252260730-0412e8e2108e?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=200&q=80"
+                        alt="Installation"
+                        className="rounded-md w-full h-28 object-cover"
+                      />
+                      <img
+                        src="https://images.unsplash.com/photo-1581578017093-cd30fce4eeb7?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=200&q=80"
+                        alt="Clean Water"
+                        className="rounded-md w-full h-28 object-cover"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Timeline item 3 */}
+                <div className="relative pl-8 pb-6 border-l-2 border-orange-200">
+                  <div className="absolute left-[-8px] top-0 bg-orange-500 w-4 h-4 rounded-full"></div>
+                  <div className="bg-orange-50 rounded-lg p-4">
+                    <div className="flex items-center mb-2">
+                      <Calendar className="text-orange-600 mr-2" size={16} />
+                      <span className="text-sm text-orange-800 font-medium">October 12, 2023</span>
+                      <span className="ml-auto px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">In Progress</span>
+                    </div>
+                    <h4 className="font-bold text-slate-800 mb-2">Community Training Program</h4>
+                    <p className="text-sm text-slate-600">Conducted training sessions for local community members on system maintenance and water quality testing procedures.</p>
+                    <img
+                      src="https://images.unsplash.com/photo-1544531586-fde5298cdd40?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80"
+                      alt="Training Program"
+                      className="mt-3 rounded-md w-full h-40 object-cover"
+                    />
+                  </div>
+                </div>
+
+                {/* Timeline item 4 */}
+                <div className="relative pl-8 border-l-2 border-orange-200">
+                  <div className="absolute left-[-8px] top-0 bg-slate-300 w-4 h-4 rounded-full"></div>
+                  <div className="bg-slate-50 rounded-lg p-4">
+                    <div className="flex items-center mb-2">
+                      <Calendar className="text-slate-500 mr-2" size={16} />
+                      <span className="text-sm text-slate-600 font-medium">December 2023</span>
+                      <span className="ml-auto px-2 py-1 bg-slate-200 text-slate-700 text-xs rounded-full">Upcoming</span>
+                    </div>
+                    <h4 className="font-bold text-slate-700 mb-2">Expansion to Three More Villages</h4>
+                    <p className="text-sm text-slate-600">Planning to expand our clean water initiative to three additional villages, potentially reaching 1,500+ more people.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                <div className="flex items-start">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500 mt-0.5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div>
+                    <h4 className="font-medium text-blue-800 mb-1">Project Status Update</h4>
+                    <p className="text-sm text-blue-700">
+                      We're currently at 45% of our overall project completion. Your continued support will help us reach our goal of providing clean water to all 15 target villages by the end of next year.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        {/* Payment Section */}
+        <div className="lg:col-span-1">
+          <Card className="sticky top-24 border-0 shadow-md">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-center mb-4">
+                <Heart className="text-orange-500 mr-2" size={24} />
+                <h3 className="text-xl font-bold text-center">Support This Campaign</h3>
+              </div>
+
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-6">
+                <div className="flex items-start">
+                  <Award className="text-orange-600 mr-2 mt-1 flex-shrink-0" size={18} />
+                  <div>
+                    <p className="text-sm text-orange-800">
+                      <span className="font-semibold">Top Supporter Badge</span> - Donate ₹100 or more to receive a special supporter badge on your profile.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  {/* First Name field */}
+                  <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center">
+                          <Users className="mr-1" size={14} />
+                          First Name
+                        </FormLabel>
+                        <FormControl>
+                          <Input {...field} className="focus:ring-orange-500 focus:border-orange-500" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Last Name field */}
+                  <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center">
+                          Last Name
+                        </FormLabel>
+                        <FormControl>
+                          <Input {...field} className="focus:ring-orange-500 focus:border-orange-500" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Email field */}
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          </svg>
+                          Email
+                        </FormLabel>
+                        <FormControl>
+                          <Input {...field} type="email" className="focus:ring-orange-500 focus:border-orange-500" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Mobile field */}
+                  <FormField
+                    control={form.control}
+                    name="mobile"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                          </svg>
+                          Mobile Number
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="tel"
+                            placeholder="+91 (XXX) XXX-XXXX"
+                            className="focus:ring-orange-500 focus:border-orange-500"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Donation Amount section */}
+                  <div className="space-y-2">
+                    <FormLabel className="flex items-center">
+                      <CreditCard className="mr-1" size={14} />
+                      Donation Amount
+                    </FormLabel>
+
+                    {/* Popular donation amounts */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
+                      {[25, 50, 100, 250].map((amount) => (
+                        <div
+                          key={amount}
+                          onClick={() => handlePresetAmountClick(amount)}
+                          className={`cursor-pointer px-4 py-2 border rounded-md text-center transition-all duration-200
+                ${amountType === 'preset' && presetAmount === amount
+                              ? 'border-orange-500 bg-orange-50 text-orange-600 shadow-sm'
+                              : 'border-slate-200 hover:border-orange-500 hover:bg-orange-50'
+                            }`}
+                        >
+                          <div className="font-medium">₹{amount}</div>
+                          {amount === 25 && <div className="text-xs text-slate-500">Basic</div>}
+                          {amount === 50 && <div className="text-xs text-slate-500">Popular</div>}
+                          {amount === 100 && <div className="text-xs text-orange-600 font-medium">Supporter</div>}
+                          {amount === 250 && <div className="text-xs text-orange-600 font-medium">Champion</div>}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Custom amount input */}
+                    <div className="flex">
+                      <span className="inline-flex items-center px-3 bg-slate-100 border border-r-0 border-slate-300 rounded-l-md">
+                        ₹
+                      </span>
+                      <input
+                        type="number"
+                        className={`flex-1 p-2 border rounded-r-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500
+              ${amountType === 'custom' ? 'border-orange-500' : 'border-slate-300'}`
+                        }
+                        placeholder="Other amount"
+                        min="1"
+                        onChange={handleCustomAmountChange}
+                      />
+                    </div>
+                    {form.formState.errors.amount && (
+                      <p className="text-sm text-red-500 mt-1">{form.formState.errors.amount.message}</p>
+                    )}
+                  </div>
+
+                  {/* Additional options */}
+                  <div className="space-y-3 pt-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="coverFees"
+                        checked={form.watch("coverFees")}
+                        onCheckedChange={(checked) => form.setValue("coverFees", checked === true)}
+                      />
+                      <label htmlFor="coverFees" className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        Cover transaction fees (3%)
+                      </label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="isMonthly"
+                        checked={form.watch("isMonthly")}
+                        onCheckedChange={(checked) => form.setValue("isMonthly", checked === true)}
+                      />
+                      <div>
+                        <label htmlFor="isMonthly" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          Make this a monthly donation
+                        </label>
+                        <p className="text-xs text-slate-500 mt-1">Your support will automatically renew each month</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Donation summary */}
+                  <div className="bg-slate-50 p-3 rounded-md border border-slate-200 space-y-2">
+                    <div className="text-sm font-medium">Donation Summary</div>
+                    <div className="flex justify-between text-sm">
+                      <span>Donation amount:</span>
+                      <span>₹{amountType === 'preset' ? presetAmount : form.watch("amount") || 0}</span>
+                    </div>
+                    {form.watch("coverFees") && (
+                      <div className="flex justify-between text-sm">
+                        <span>Transaction fee (3%):</span>
+                        <span>₹{((amountType === 'preset' ? presetAmount : form.watch("amount") || 0) * 0.03).toFixed(2)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between font-medium pt-1 border-t border-slate-200">
+                      <span>Total:</span>
+                      <span>₹{form.watch("coverFees")
+                        ? ((amountType === 'preset' ? presetAmount : form.watch("amount") || 0) * 1.03).toFixed(2)
+                        : (amountType === 'preset' ? presetAmount : form.watch("amount") || 0)
+                      }</span>
+                    </div>
+                  </div>
+
+                  {/* Submit button */}
+                  <Button
+                    type="submit"
+                    className="w-full py-6 text-lg bg-orange-500 hover:bg-orange-600 text-white transition-all duration-300 hover:shadow-lg hover:shadow-orange-200"
+                    disabled={isProcessingPayment}
+                  >
+                    {isProcessingPayment ? (
+                      <div className="flex items-center justify-center">
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Processing...
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center">
+                        <Heart className="mr-2" size={20} />
+                        Donate Now
+                      </div>
+                    )}
+                  </Button>
+
+                  {/* Security badges */}
+                  <div className="flex flex-col items-center space-y-2 mt-3">
+                    <div className="flex items-center text-xs text-slate-500">
+                      <Shield className="mr-1" size={14} />
+                      Your payment information is secure
+                    </div>
+                    <div className="flex space-x-3">
+                      <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/visa.svg" alt="Visa" className="h-6 w-auto opacity-60" />
+                      <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/mastercard.svg" alt="Mastercard" className="h-6 w-auto opacity-60" />
+                      <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/americanexpress.svg" alt="American Express" className="h-6 w-auto opacity-60" />
+                      <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/googlepay.svg" alt="Google Pay" className="h-6 w-auto opacity-60" />
+                    </div>
+                  </div>
+
+                  {/* Impact message */}
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <div className="flex items-start">
+                      <CheckCircle2 className="text-green-600 mr-2 mt-1 flex-shrink-0" size={18} />
+                      <div>
+                        <p className="text-sm text-green-800">
+                          <span className="font-semibold">Your Impact:</span> Your donation will directly help {campaign.title} reach its goal of ₹{campaign.goalAmount.toLocaleString()}.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        </div>
+
+      </div>
+
+      {/* Sticky donate button for mobile */}
+      {showStickyDonate && (
+        <div className="sticky-donate-btn fixed bottom-0 left-0 right-0 bg-white shadow-lg p-3 z-50 lg:hidden">
+          <Button
+            className="w-full py-4 text-lg bg-orange-500 hover:bg-orange-600 text-white transition-all duration-300"
+            onClick={() => {
+              // Scroll to the donation form section
+              const donationForm = document.querySelector('.lg\\:col-span-1');
+              if (donationForm) {
+                donationForm.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+          >
+            Donate Now <i className="bi bi-arrow-right ms-2"></i>
+          </Button>
+        </div>
+      )}
+
+      {/* Add CSS for styling */}
+      <style jsx="true" global="true">{`
                           .video-container {
                             position: relative;
                             width: 100%;
@@ -848,8 +1679,8 @@ async function onSubmit(data: DonationForm) {
                             --tw-shadow-color: #fed7aa;
                           }
                         `}</style>
-                      </div>
-                    );
-                  }
-                  
-                  
+    </div>
+  );
+}
+
+

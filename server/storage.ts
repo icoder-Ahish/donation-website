@@ -76,6 +76,8 @@ export interface IStorage {
   getPaymentByOrderId(orderId: string): Promise<IPayment | null>;
   updatePayment(id: string, data: Partial<PaymentData>): Promise<IPayment | null>;
   getPaymentByDonationId(donationId: string): Promise<IPayment | null>;
+  // New method
+  updateCampaignStatistics(donationId: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -106,19 +108,33 @@ export class DatabaseStorage implements IStorage {
     return mapDocument(savedCampaign);
   }
 
-  async updateCampaign(id: string, data: Partial<CampaignData>): Promise<ICampaign | null> {
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return null;
+  async updateCampaignStatistics(donationId: string): Promise<boolean> {
+    try {
+      if (!mongoose.Types.ObjectId.isValid(donationId)) {
+        return false;
+      }
+      
+      const donation = await Donation.findById(donationId);
+      if (!donation || !donation.campaignId || donation.status !== 'completed') {
+        return false;
+      }
+      
+      // Update campaign statistics
+      const campaign = await Campaign.findById(donation.campaignId);
+      if (campaign) {
+        campaign.raisedAmount = Number(campaign.raisedAmount || 0) + Number(donation.amount);
+        campaign.donorCount = Number(campaign.donorCount || 0) + 1;
+        await campaign.save();
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error("Error updating campaign statistics:", error);
+      return false;
     }
-    
-    const updatedCampaign = await Campaign.findByIdAndUpdate(
-      id,
-      { $set: data },
-      { new: true, runValidators: true }
-    );
-    return updatedCampaign ? mapDocument(updatedCampaign) : null;
   }
-
+  
   // Donation Methods
   async createDonation(donation: DonationData): Promise<IDonation> {
     // Create the new donation
@@ -126,14 +142,14 @@ export class DatabaseStorage implements IStorage {
     await newDonation.save();
     
     // Update campaign statistics (raised amount and donor count)
-    if (mongoose.Types.ObjectId.isValid(donation.campaignId)) {
-      const campaign = await Campaign.findById(donation.campaignId);
-      if (campaign) {
-        campaign.raisedAmount = Number(campaign.raisedAmount || 0) + Number(donation.amount);
-        campaign.donorCount = Number(campaign.donorCount || 0) + 1;
-        await campaign.save();
-      }
-    }
+    // if (mongoose.Types.ObjectId.isValid(donation.campaignId)) {
+    //   const campaign = await Campaign.findById(donation.campaignId);
+    //   if (campaign) {
+    //     campaign.raisedAmount = Number(campaign.raisedAmount || 0) + Number(donation.amount);
+    //     campaign.donorCount = Number(campaign.donorCount || 0) + 1;
+    //     await campaign.save();
+    //   }
+    // }
     
     return mapDocument(newDonation);
   }
@@ -230,10 +246,10 @@ export class DatabaseStorage implements IStorage {
             
             <h4>How Your Donation Helps</h4>
             <ul>
-              <li>$25 provides clean water to one person for a year</li>
-              <li>$100 funds water quality testing for an entire community</li>
-              <li>$500 contributes to a community water purification system</li>
-              <li>$1,000 sponsors a complete water access point for a village</li>
+              <li>₹250 provides clean water to one person for a year</li>
+              <li>₹1000 funds water quality testing for an entire community</li>
+              <li>₹5000 contributes to a community water purification system</li>
+              <li>₹10,000 sponsors a complete water access point for a village</li>
             </ul>
             
             <h4>Impact and Sustainability</h4>
@@ -258,10 +274,10 @@ export class DatabaseStorage implements IStorage {
             
             <h4>How Your Donation Helps</h4>
             <ul>
-              <li>$25 provides a school supply kit for one child</li>
-              <li>$100 funds training for a teacher</li>
-              <li>$500 contributes to classroom renovations</li>
-              <li>$1,000 provides a full year scholarship for a student</li>
+              <li>₹25 provides a school supply kit for one child</li>
+              <li>₹100 funds training for a teacher</li>
+              <li>₹500 contributes to classroom renovations</li>
+              <li>₹1,000 provides a full year scholarship for a student</li>
             </ul>
             
             <h4>Impact and Sustainability</h4>
@@ -286,10 +302,10 @@ export class DatabaseStorage implements IStorage {
             
             <h4>How Your Donation Helps</h4>
             <ul>
-              <li>$25 provides basic medications for a patient</li>
-              <li>$100 funds a medical check-up for five people</li>
-              <li>$500 contributes to medical equipment for mobile clinics</li>
-              <li>$1,000 sponsors a day of full medical services for a community</li>
+              <li>₹25 provides basic medications for a patient</li>
+              <li>₹100 funds a medical check-up for five people</li>
+              <li>₹500 contributes to medical equipment for mobile clinics</li>
+              <li>₹1,000 sponsors a day of full medical services for a community</li>
             </ul>
             
             <h4>Impact and Sustainability</h4>
@@ -321,15 +337,15 @@ export class DatabaseStorage implements IStorage {
         const campaignId = campaign._id.toString();
         
         for (let i = 0; i < randomDonorCount; i++) {
-          const donationAmount = Math.floor(Math.random() * 200) + 10; // $10-$210
+          const donationAmount = Math.floor(Math.random() * 200) + 10; // ₹10-₹210
           
           // Create a donation
           await this.createDonation({
             campaignId,
-            firstName: `Donor${i}`,
-            lastName: `Sample${i}`,
-            email: `donor${i}@example.com`,
-            mobile: `+1${Math.floor(1000000000 + Math.random() * 9000000000)}`,
+            firstName: `Donor₹{i}`,
+            lastName: `Sample₹{i}`,
+            email: `donor₹{i}@example.com`,
+            mobile: `+1₹{Math.floor(1000000000 + Math.random() * 9000000000)}`,
             amount: donationAmount,
             coverFees: Math.random() > 0.5,
             isMonthly: Math.random() > 0.8

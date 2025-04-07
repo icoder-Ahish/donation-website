@@ -300,6 +300,8 @@ apiRouter.get("/thank-you-redirect", async (req: Request, res: Response) => {
               paymentMethod: paymentData.payment_method || payment.paymentMethod || "Unknown",
               status: "completed"
             });
+            // Update campaign statistics after successful payment
+            await storage.updateCampaignStatistics(donation_id as string);
           }
         }
         
@@ -463,6 +465,9 @@ apiRouter.post("/payment/verify", async (req: Request, res: Response) => {
           paymentMethod: paymentMethodString,
           status: "completed"
         });
+        // Update campaign statistics after successful payment
+      await storage.updateCampaignStatistics((payment as any).donationId.toString());
+
       } else if (paymentStatus === "FAILED" || paymentStatus === "CANCELLED") {
         // Update donation status for failed or cancelled payments
         await storage.updateDonation((payment as any).donationId.toString(), {
@@ -535,6 +540,8 @@ apiRouter.post("/payment/verify", async (req: Request, res: Response) => {
           paymentMethod: data.payment_method || "Unknown",
           status: "completed"
         });
+        // Update campaign statistics after successful payment
+        await storage.updateCampaignStatistics((payment as any).donationId.toString());
       }
       
       res.status(200).json({ message: "Webhook processed successfully" });

@@ -116,7 +116,7 @@ const getLinkClassName = (path: string) => {
               </svg>
             </button>
 
-            <div className={`lg:flex lg:items-center ${isMenuOpen ? 'block absolute top-full left-0 right-0 bg-primary shadow-md mt-1 py-4 px-4 lg:relative lg:shadow-none lg:mt-0 lg:py-0 lg:bg-transparent' : 'hidden'}`}>
+            <div className={`lg:flex lg:items-center ${isMenuOpen ? 'block absolute top-full left-0 right-0 bg-[#0D1B2A] shadow-md mt-1 py-4 px-4 lg:relative lg:shadow-none lg:mt-0 lg:py-0 lg:bg-transparent' : 'hidden'}`}>
               <ul className="lg:flex lg:items-center space-y-4 lg:space-y-0 lg:mr-4">
                 <li className="lg:mx-3">
                   <Link href="/"
