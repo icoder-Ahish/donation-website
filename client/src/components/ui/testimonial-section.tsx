@@ -8,35 +8,35 @@ const testimonials = [
     name: "Sarah Johnson",
     profession: "Teacher",
     image: "/img/testimonial-1.jpg",
-    text: "I've been donating through CareNest for over a year now, and I'm impressed by the transparency and impact. It's wonderful to see exactly how my contributions are making a difference in people's lives."
+    text: "I've been donating through DreamHope Foundation for over a year now, and I'm impressed by the transparency and impact. It's wonderful to see exactly how my contributions are making a difference in people's lives."
   },
   {
     id: 2,
     name: "Michael Chen",
     profession: "Software Engineer",
     image: "/img/testimonial-2.jpg",
-    text: "What I appreciate most about CareNest is how easy they make it to support causes I care about. The platform is intuitive, and I can set up recurring donations in just a few clicks."
+    text: "What I appreciate most about DreamHope Foundation is how easy they make it to support causes I care about. The platform is intuitive, and I can set up recurring donations in just a few clicks."
   },
   {
     id: 3,
     name: "Priya Sharma",
     profession: "Healthcare Worker",
     image: "/img/testimonial-3.jpg",
-    text: "As someone who works in healthcare, I've seen firsthand the impact that donations can have. CareNest connects donors with meaningful projects that truly change lives for the better."
+    text: "As someone who works in healthcare, I've seen firsthand the impact that donations can have. DreamHope Foundation connects donors with meaningful projects that truly change lives for the better."
   },
   {
     id: 4,
     name: "Michael Chen",
     profession: "Software Engineer",
     image: "/img/testimonial-2.jpg",
-    text: "What I appreciate most about CareNest is how easy they make it to support causes I care about. The platform is intuitive, and I can set up recurring donations in just a few clicks."
+    text: "What I appreciate most about DreamHope Foundation is how easy they make it to support causes I care about. The platform is intuitive, and I can set up recurring donations in just a few clicks."
   },
   {
     id: 5,
     name: "Priya Sharma",
     profession: "Healthcare Worker",
     image: "/img/testimonial-3.jpg",
-    text: "As someone who works in healthcare, I've seen firsthand the impact that donations can have. CareNest connects donors with meaningful projects that truly change lives for the better."
+    text: "As someone who works in healthcare, I've seen firsthand the impact that donations can have. DreamHope Foundation connects donors with meaningful projects that truly change lives for the better."
   }
 ];
 

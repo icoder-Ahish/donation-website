@@ -49,11 +49,11 @@ const getLinkClassName = (path: string) => {
             <div className="flex items-center">
               <small className="flex items-center mr-4">
                 <i className="bi bi-geo-alt-fill mr-2"></i>
-                City Satna, Madhya Pradesh,India
+                City Katni, Madhya Pradesh,India
               </small>
               <small className="flex items-center">
                 <i className="bi bi-envelope-fill mr-2"></i>
-                carenestfoundation@gmail.com
+                dreamhopefoundation@gmail.com
               </small>
             </div>
             <div className="flex items-center">
@@ -79,10 +79,14 @@ const getLinkClassName = (path: string) => {
       <nav className="sticky top-0 z-50 bg-[#0D1B2A] text-white py-3 wow fadeIn" data-wow-delay="0.1s">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
+            {/* Logo */}
             <Link href="/" className="text-xl font-bold flex items-center">
+            <img src="/img/dreamhomelogo.png" alt="img" className="w-[80px] h-[80px]" />
+
               <h1 className="font-bold m-0">
-                <span className="text-white">Care</span>
-                <span className="text-secondary">Nest</span>
+                {/* <span className="text-white">Care</span>
+                <span className="text-secondary">Nest</span> */}
+                {/* <img src="/img/dreamhomelogo.png" alt="img" className="w-10 h-10" /> */}
               </h1>
             </Link>
 

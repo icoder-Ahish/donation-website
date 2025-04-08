@@ -9,7 +9,7 @@ export default function Footer() {
             <h5 className="font-bold mb-4">
               <Link href="/" className="text-white hover:text-primary flex items-center no-underline">
                 <i className="bi bi-heart-fill mr-2 text-primary"></i>
-                CareNest
+                DreamHope Foundation
               </Link>
             </h5>
             <p className="mb-4 text-slate-300">Making the world a better place through the power of collective generosity.</p>
@@ -55,11 +55,11 @@ export default function Footer() {
             <ul className="space-y-2 text-slate-300">
               <li className="flex items-start">
                 <i className="bi bi-geo-alt mr-2 mt-1"></i>
-                <span>Word No. 37 Satna City, Madhya Pradesh, India</span>
+                <span>Katni City, Madhya Pradesh, India</span>
               </li>
               <li className="flex items-start">
                 <i className="bi bi-envelope mr-2 mt-1"></i>
-                <span>carenestfoundation@gmail.com</span>
+                <span>dreamhopefoundation@gmail.com</span>
               </li>
               <li className="flex items-start">
                 <i className="bi bi-telephone mr-2 mt-1"></i>
@@ -74,7 +74,7 @@ export default function Footer() {
         </div>
         
         <div className="border-t border-slate-700 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-slate-400">© {new Date().getFullYear()} CareNest. All rights reserved.</p>
+          <p className="text-slate-400">© {new Date().getFullYear()} DreamHope Foundation. All rights reserved.</p>
           <div className="mt-4 md:mt-0 flex items-center gap-4">
             <select className="bg-slate-800 text-white border border-slate-700 rounded-md px-2 py-1 text-sm">
               <option value="en-US">English (US)</option>

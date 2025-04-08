@@ -8,7 +8,7 @@ export default function RefundCancellationPage() {
           <div className="prose max-w-none">
             <h2 className="text-2xl font-semibold mt-8 mb-4">Refund Policy</h2>
             <p>
-              Donations to CareNest Foundation are primarily non-refundable. However, in specific cases:
+              Donations to DreamHope Foundation Foundation are primarily non-refundable. However, in specific cases:
             </p>
             
             <h3 className="text-xl font-medium mt-6 mb-3">1. Accidental Transactions</h3>
@@ -23,7 +23,7 @@ export default function RefundCancellationPage() {
             
             <h3 className="text-xl font-medium mt-6 mb-3">3. Contact for Refunds</h3>
             <p>
-              To request a refund, email us at carenestfoundation@gmail.com with transaction details.
+              To request a refund, email us at dreamhopefoundation@gmail.com with transaction details.
             </p>
             
             <h2 className="text-2xl font-semibold mt-8 mb-4">Cancellation Policy</h2>
@@ -43,7 +43,7 @@ export default function RefundCancellationPage() {
             
             <h3 className="text-xl font-medium mt-6 mb-3">3. Support</h3>
             <p>
-              For cancellations, email carenestfoundation@gmail.com
+              For cancellations, email dreamhopefoundation@gmail.com
             </p>
           </div>
         </div>

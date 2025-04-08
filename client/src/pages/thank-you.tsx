@@ -101,7 +101,7 @@ export default function ThankYou() {
       // Add logo or header
       doc.setFontSize(22);
       doc.setTextColor(242, 88, 34); // Orange color
-      doc.text("CareNest", 105, 20, { align: "center" });
+      doc.text("DreamHope Foundation", 105, 20, { align: "center" });
       
       doc.setFontSize(16);
       doc.setTextColor(0, 0, 0);
@@ -138,18 +138,18 @@ export default function ThankYou() {
       
       doc.setTextColor(0, 0, 0);
       doc.setFontSize(10);
-      doc.text("This receipt is proof of your donation to CareNest Foundation.", 105, 110, { align: "center" });
-      doc.text("For any queries, please contact us at carenestfoundation@gmail.com", 105, 120, { align: "center" });
+      doc.text("This receipt is proof of your donation to DreamHope Foundation Foundation.", 105, 110, { align: "center" });
+      doc.text("For any queries, please contact us at dreamhopefoundation@gmail.com", 105, 120, { align: "center" });
       
       doc.setFontSize(12);
       doc.setTextColor(242, 88, 34);
-      doc.text("CareNest Foundation", 105, 140, { align: "center" });
+      doc.text("DreamHope Foundation Foundation", 105, 140, { align: "center" });
       doc.setTextColor(0, 0, 0);
       doc.setFontSize(10);
       doc.text("Making a difference together", 105, 147, { align: "center" });
-      doc.text(`© ${new Date().getFullYear()} CareNest Foundation`, 105, 154, { align: "center" });
+      doc.text(`© ${new Date().getFullYear()} DreamHope Foundation Foundation`, 105, 154, { align: "center" });
       
-      doc.save(`CareNest_Receipt_${paymentDetails.order_id || 'donation'}.pdf`);
+      doc.save(`DreamHope Foundation_Receipt_${paymentDetails.order_id || 'donation'}.pdf`);
       
       toast({
         title: "Receipt Downloaded",
@@ -328,7 +328,7 @@ export default function ThankYou() {
                   onClick={() => {
                     toast({
                       title: "Contact Support",
-                      description: "Please email us at carenestfoundation@gmail.com",
+                      description: "Please email us at dreamhopefoundation@gmail.com",
                       variant: "default"
                     });
                   }}
