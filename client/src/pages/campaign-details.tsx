@@ -14,8 +14,8 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { load } from '@cashfreepayments/cashfree-js';
 import {
-  Play, Pause, Volume2, VolumeX, Heart, CreditCard, Shield, Award, Users, Clock, CheckCircle2, Target, BarChart3, Calendar, ThumbsUp, Share2, Bookmark,
-  ArrowRight, Globe, Droplet, BookOpen, Leaf, Zap
+  Play, Pause, Volume2, VolumeX, Heart, CreditCard, Shield, Award, Users, Clock, CheckCircle2, Target, BarChart3, Calendar, ThumbsUp,
+  ArrowRight, Globe, Droplet, BookOpen, Leaf, Zap, Crown, Medal, Star,
 } from "lucide-react";
 
 declare global {
@@ -38,6 +38,15 @@ export default function CampaignDetails() {
   const [cashfree, setCashfree] = useState<any>(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
+  // Add this after your imports
+  const topDonors = [
+    { id: 1, name: "Rajesh Kumar", amount: 5000, date: "Feb 15, 2023", badge: "Platinum", avatar: "https://randomuser.me/api/portraits/men/32.jpg" },
+    { id: 2, name: "Priya Sharma", amount: 3500, date: "Feb 18, 2023", badge: "Gold", avatar: "https://randomuser.me/api/portraits/women/44.jpg" },
+    { id: 3, name: "Amit Singh", amount: 2000, date: "Feb 20, 2023", badge: "Silver", avatar: "https://randomuser.me/api/portraits/men/67.jpg" },
+    { id: 4, name: "Neha Patel", amount: 1500, date: "Feb 22, 2023", badge: "Bronze", avatar: "https://randomuser.me/api/portraits/women/28.jpg" },
+    { id: 5, name: "Vikram Joshi", amount: 1000, date: "Feb 25, 2023", badge: "Supporter", avatar: "https://randomuser.me/api/portraits/men/15.jpg" },
+    { id: 6, name: "Ananya Gupta", amount: 750, date: "Feb 27, 2023", badge: "Friend", avatar: "https://randomuser.me/api/portraits/women/63.jpg" },
+  ];
   // Video player states
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -460,6 +469,11 @@ export default function CampaignDetails() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
           {/* Campaign video player */}
+          <p className="text-lg text-red-600 font-semibold mb-4 flex items-center gap-2">
+            <Clock className="w-5 h-5" />
+            Urgent Help Needed: Every rupee counts in this critical moment. Your support can bring hope and healing—please donate today.
+          </p>
+
           <h1 className="text-3xl font-bold mb-3 text-slate-800">{campaign.title}</h1>
           <div className="video-container relative mb-6 rounded-lg overflow-hidden shadow-lg">
             <iframe
@@ -470,7 +484,6 @@ export default function CampaignDetails() {
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             ></iframe>
-
 
             {/* Updated YouTube video player */}
             <div className="video-container relative mb-6 rounded-lg overflow-hidden shadow-lg">
@@ -494,13 +507,11 @@ export default function CampaignDetails() {
                   >
                     {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
                   </button>
-
                 </div>
               </div>
             </div></div>
 
           {/* Campaign details */}
-
           <div className="mb-6">
             <div className="flex flex-wrap items-center gap-3 mb-4">
               <span className="px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800 border border-orange-200 shadow-sm flex items-center">
@@ -623,7 +634,7 @@ export default function CampaignDetails() {
                 <div className="relative mb-6">
                   <div className="absolute -top-2 -right-2 bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-md flex items-center">
                     <Award className="mr-1" size={14} />
-                    High Impact Project
+                    Urgent Need
                   </div>
                   <div className="bg-gradient-to-r from-slate-50 to-orange-50 p-5 rounded-lg border border-orange-100">
                     <h3 className="text-xl font-bold text-slate-800 flex items-center mb-3">
@@ -695,72 +706,6 @@ export default function CampaignDetails() {
                   </div>
                 </div>
 
-                {/* Testimonial section */}
-                <div className="my-8 bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-lg border border-blue-100">
-                  <h3 className="text-xl font-bold text-slate-800 flex items-center mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                    </svg>
-                    Community Voices
-                  </h3>
-
-                  <div className="bg-white p-4 rounded-lg shadow-sm mb-4">
-                    <div className="flex items-start">
-                      <div className="flex-shrink-0 mr-4">
-                        <img
-                          src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&h=100&q=80"
-                          alt="Community member"
-                          className="w-14 h-14 rounded-full object-cover border-2 border-blue-200"
-                        />
-                      </div>
-                      <div>
-                        <div className="flex items-center mb-1">
-                          <h4 className="font-bold text-slate-800">Maria Nkosi</h4>
-                          <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">Village Elder</span>
-                        </div>
-                        <p className="text-slate-600 italic mb-2">
-                          "Before this project, I had to walk 3 kilometers every day to fetch water that wasn't even clean. Now, we have safe water right in our village. My children are healthier, and I have more time for other activities."
-                        </p>
-                        <div className="flex">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <svg key={star} xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white p-4 rounded-lg shadow-sm">
-                    <div className="flex items-start">
-                      <div className="flex-shrink-0 mr-4">
-                        <img
-                          src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&h=100&q=80"
-                          alt="Community member"
-                          className="w-14 h-14 rounded-full object-cover border-2 border-blue-200"
-                        />
-                      </div>
-                      <div>
-                        <div className="flex items-center mb-1">
-                          <h4 className="font-bold text-slate-800">Joseph Mwangi</h4>
-                          <span className="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">System Technician</span>
-                        </div>
-                        <p className="text-slate-600 italic mb-2">
-                          "I've been trained to maintain our water system, and it's given me valuable skills and a sense of purpose. Our community is healthier now, and I'm proud to be part of the solution."
-                        </p>
-                        <div className="flex">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <svg key={star} xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
                 {/* Commitment section */}
                 <div className="bg-orange-50 border border-orange-100 rounded-lg p-4 my-6">
                   <h4 className="text-orange-800 font-semibold flex items-center mb-2">
@@ -798,101 +743,96 @@ export default function CampaignDetails() {
                   </div>
                 </div>
 
-                {/* Project impact with images in a grid */}
-                <h3 className="font-bold text-xl mt-8 mb-4 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Project Impact
-                </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                  <div className="relative group">
-                    <img
-                      src="https://images.unsplash.com/photo-1635236066069-cd6e699a8a2a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80"
-                      alt="Clean water source"
-                      className="rounded-md shadow-sm group-hover:shadow-md transition-shadow duration-300 w-full h-64 object-cover"
-                    />
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                      <h4 className="text-white font-semibold">Clean Water Source</h4>
-                      <p className="text-white/80 text-sm">Newly installed water purification system</p>
-                    </div>
-                  </div>
-                  <div className="relative group">
-                    <img
-                      src="https://images.unsplash.com/photo-1616628188859-7a11abb6fcc9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80"
-                      alt="Community gathering"
-                      className="rounded-md shadow-sm group-hover:shadow-md transition-shadow duration-300 w-full h-64 object-cover"
-                    />
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                      <h4 className="text-white font-semibold">Community Gathering</h4>
-                      <p className="text-white/80 text-sm">Local residents celebrating access to clean water</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                  <div className="relative group">
-                    <img
-                      src="https://images.unsplash.com/photo-1551734413-5943d61e982f?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80"
-                      alt="Children at school"
-                      className="rounded-md shadow-sm group-hover:shadow-md transition-shadow duration-300 w-full h-48 object-cover"
-                    />
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
-                      <h4 className="text-white font-semibold text-sm">Education Impact</h4>
-                      <p className="text-white/80 text-xs">Children attending school regularly now</p>
-                    </div>
-                  </div>
-                  <div className="relative group">
-                    <img
-                      src="https://images.unsplash.com/photo-1527613426441-4da17471b66d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80"
-                      alt="Water testing"
-                      className="rounded-md shadow-sm group-hover:shadow-md transition-shadow duration-300 w-full h-48 object-cover"
-                    />
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
-                      <h4 className="text-white font-semibold text-sm">Water Quality Testing</h4>
-                      <p className="text-white/80 text-xs">Regular monitoring ensures safety</p>
-                    </div>
-                  </div>
-                  <div className="relative group">
-                    <img
-                      src="https://images.unsplash.com/photo-1541252260730-0412e8e2108e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80"
-                      alt="System installation"
-                      className="rounded-md shadow-sm group-hover:shadow-md transition-shadow duration-300 w-full h-48 object-cover"
-                    />
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
-                      <h4 className="text-white font-semibold text-sm">System Installation</h4>
-                      <p className="text-white/80 text-xs">Local technicians being trained</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Statistics section */}
-                <div className="bg-slate-50 p-5 rounded-lg border border-slate-200 mb-8">
-                  <h3 className="font-bold text-xl mb-4 flex items-center">
-                    <BarChart3 className="mr-2 text-slate-700" size={20} />
+                {/* Statistics section - further improved responsive version */}
+                <div className="bg-slate-50 p-4 sm:p-5 rounded-lg border border-slate-200 mb-8">
+                  <h3 className="font-bold text-lg sm:text-xl mb-3 sm:mb-4 flex items-center">
+                    <BarChart3 className="mr-2 text-slate-700" size={18} />
                     Project Statistics
                   </h3>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-white p-4 rounded-md shadow-sm text-center">
-                      <div className="text-3xl font-bold text-orange-500 mb-1">15</div>
-                      <div className="text-sm text-slate-600">Villages Targeted</div>
+                  <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
+                    <div className="bg-white p-2 sm:p-4 rounded-md shadow-sm text-center">
+                      <div className="text-xl sm:text-2xl md:text-3xl font-bold text-orange-500 mb-1">15</div>
+                      <div className="text-xs text-slate-600 truncate">Villages Targeted</div>
                     </div>
-                    <div className="bg-white p-4 rounded-md shadow-sm text-center">
-                      <div className="text-3xl font-bold text-orange-500 mb-1">7,500+</div>
-                      <div className="text-sm text-slate-600">People Impacted</div>
+                    <div className="bg-white p-2 sm:p-4 rounded-md shadow-sm text-center">
+                      <div className="text-xl sm:text-2xl md:text-3xl font-bold text-orange-500 mb-1">7,500+</div>
+                      <div className="text-xs text-slate-600 truncate">People Impacted</div>
                     </div>
-                    <div className="bg-white p-4 rounded-md shadow-sm text-center">
-                      <div className="text-3xl font-bold text-orange-500 mb-1">80%</div>
-                      <div className="text-sm text-slate-600">Disease Reduction</div>
+                    <div className="bg-white p-2 sm:p-4 rounded-md shadow-sm text-center">
+                      <div className="text-xl sm:text-2xl md:text-3xl font-bold text-orange-500 mb-1">80%</div>
+                      <div className="text-xs text-slate-600 truncate">Disease Reduction</div>
                     </div>
-                    <div className="bg-white p-4 rounded-md shadow-sm text-center">
-                      <div className="text-3xl font-bold text-orange-500 mb-1">10+ yrs</div>
-                      <div className="text-sm text-slate-600">System Lifespan</div>
+                    <div className="bg-white p-2 sm:p-4 rounded-md shadow-sm text-center">
+                      <div className="text-xl sm:text-2xl md:text-3xl font-bold text-orange-500 mb-1">10+ yrs</div>
+                      <div className="text-xs text-slate-600 truncate">System Lifespan</div>
                     </div>
                   </div>
                 </div>
+
+                {/* Top Donors section - improved responsive version */}
+                <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-4 sm:p-5 rounded-lg border border-purple-100 mb-8">
+                  <h3 className="font-bold text-lg sm:text-xl mb-3 sm:mb-4 flex items-center">
+                    <Award className="mr-2 text-purple-600" size={18} />
+                    Top Supporters
+                  </h3>
+
+                  <div className="space-y-2 sm:space-y-3">
+                    {topDonors.map((donor) => (
+                      <div key={donor.id} className="bg-white rounded-lg p-2 sm:p-3 shadow-sm flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 transition-all duration-200 hover:shadow-md">
+                        <div className="relative flex-shrink-0">
+                          <img
+                            src={donor.avatar}
+                            alt={donor.name}
+                            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-white shadow-sm"
+                          />
+                          <div className={`absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center text-xs
+            ${donor.badge === "Platinum" ? "bg-slate-800 text-white" :
+                              donor.badge === "Gold" ? "bg-yellow-500 text-white" :
+                                donor.badge === "Silver" ? "bg-slate-400 text-white" :
+                                  donor.badge === "Bronze" ? "bg-orange-700 text-white" :
+                                    "bg-blue-500 text-white"}`}>
+                            {donor.badge === "Platinum" ? "P" :
+                              donor.badge === "Gold" ? "G" :
+                                donor.badge === "Silver" ? "S" :
+                                  donor.badge === "Bronze" ? "B" : "♥"}
+                          </div>
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                            <div className="min-w-0">
+                              <div className="font-medium text-slate-800 text-sm sm:text-base truncate">{donor.name}</div>
+                              <div className="text-xs text-slate-500">{donor.date}</div>
+                            </div>
+                            <div className="mt-1 sm:mt-0 sm:ml-2">
+                              <span className={`inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium whitespace-nowrap
+                ${donor.badge === "Platinum" ? "bg-slate-100 text-slate-800" :
+                                  donor.badge === "Gold" ? "bg-yellow-100 text-yellow-800" :
+                                    donor.badge === "Silver" ? "bg-slate-100 text-slate-700" :
+                                      donor.badge === "Bronze" ? "bg-orange-100 text-orange-800" :
+                                        "bg-blue-100 text-blue-800"}`}>
+                                {donor.badge === "Platinum" && <Crown className="mr-1" size={10} />}
+                                {donor.badge === "Gold" && <Award className="mr-1" size={10} />}
+                                {donor.badge === "Silver" && <Medal className="mr-1" size={10} />}
+                                {donor.badge === "Bronze" && <Star className="mr-1" size={10} />}
+                                {donor.badge === "Supporter" && <Heart className="mr-1" size={10} />}
+                                {donor.badge === "Friend" && <ThumbsUp className="mr-1" size={10} />}
+                                {donor.badge} Donor
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="text-right flex-shrink-0">
+                          <div className="font-bold text-orange-600 text-sm sm:text-base">₹{donor.amount}</div>
+                          <div className="text-xs text-slate-500">donation</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
 
                 {/* How your donation helps section */}
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-lg border border-blue-100 mb-8">
@@ -904,35 +844,35 @@ export default function CampaignDetails() {
                   <div className="space-y-3">
                     <div className="flex items-center">
                       <div className="bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm mr-3 flex-shrink-0">
-                        <span className="text-orange-500 font-bold">₹25</span>
+                        <span className="text-orange-500 font-bold">₹100</span>
                       </div>
                       <div className="text-slate-700">Provides clean water to one person for a month</div>
                     </div>
 
                     <div className="flex items-center">
                       <div className="bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm mr-3 flex-shrink-0">
-                        <span className="text-orange-500 font-bold">₹100</span>
+                        <span className="text-orange-500 font-bold">₹500</span>
                       </div>
                       <div className="text-slate-700">Funds water quality testing for an entire community</div>
                     </div>
 
                     <div className="flex items-center">
                       <div className="bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm mr-3 flex-shrink-0">
-                        <span className="text-orange-500 font-bold">₹250</span>
+                        <span className="text-orange-500 font-bold">₹1000</span>
                       </div>
                       <div className="text-slate-700">Provides clean water to one person for a year</div>
                     </div>
 
                     <div className="flex items-center">
                       <div className="bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm mr-3 flex-shrink-0">
-                        <span className="text-orange-500 font-bold">₹500</span>
+                        <span className="text-orange-500 font-bold">₹1500</span>
                       </div>
                       <div className="text-slate-700">Contributes to a community water purification system</div>
                     </div>
 
                     <div className="flex items-center">
                       <div className="bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm mr-3 flex-shrink-0">
-                        <span className="text-orange-500 font-bold">₹1000</span>
+                        <span className="text-orange-500 font-bold">₹2000</span>
                       </div>
                       <div className="text-slate-700">Sponsors a complete water access point for a village</div>
                     </div>
@@ -998,92 +938,6 @@ export default function CampaignDetails() {
                       <p className="text-slate-600 text-sm">
                         Yes, all donations are tax-deductible as allowed by law. You will receive a receipt for your donation that can be used for tax purposes.
                       </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Team section */}
-                <div className="mt-8 mb-4">
-                  <h3 className="font-bold text-xl mb-4 flex items-center">
-                    <Users className="mr-2 text-slate-700" size={20} />
-                    Meet Our Team
-                  </h3>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    <div className="bg-white p-4 rounded-md shadow-sm border border-slate-200 text-center">
-                      <img
-                        src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&h=150&q=80"
-                        alt="Team member"
-                        className="w-24 h-24 rounded-full mx-auto mb-3 object-cover border-2 border-orange-200"
-                      />
-                      <h4 className="font-semibold text-slate-800">Dr. Sarah Johnson</h4>
-                      <p className="text-orange-600 text-sm mb-2">Project Director</p>
-                      <p className="text-slate-600 text-sm">
-                        Water resource specialist with 15+ years of experience in sustainable water solutions.
-                      </p>
-                    </div>
-
-                    <div className="bg-white p-4 rounded-md shadow-sm border border-slate-200 text-center">
-                      <img
-                        src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&h=150&q=80"
-                        alt="Team member"
-                        className="w-24 h-24 rounded-full mx-auto mb-3 object-cover border-2 border-orange-200"
-                      />
-                      <h4 className="font-semibold text-slate-800">Michael Chang</h4>
-                      <p className="text-orange-600 text-sm mb-2">Engineering Lead</p>
-                      <p className="text-slate-600 text-sm">
-                        Environmental engineer specializing in water purification systems for rural communities.
-                      </p>
-                    </div>
-
-                    <div className="bg-white p-4 rounded-md shadow-sm border border-slate-200 text-center">
-                      <img
-                        src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&h=150&q=80"
-                        alt="Team member"
-                        className="w-24 h-24 rounded-full mx-auto mb-3 object-cover border-2 border-orange-200"
-                      />
-                      <h4 className="font-semibold text-slate-800">Amara Okafor</h4>
-                      <p className="text-orange-600 text-sm mb-2">Community Liaison</p>
-                      <p className="text-slate-600 text-sm">
-                        Works directly with local communities to ensure project sustainability and community ownership.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Partners section */}
-                <div className="mt-8 mb-4">
-                  <h3 className="font-bold text-xl mb-4 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    Our Partners
-                  </h3>
-
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-white p-4 rounded-md shadow-sm border border-slate-200 flex items-center justify-center h-24">
-                      <div className="text-center">
-                        <div className="font-semibold text-slate-800">WaterAid</div>
-                        <div className="text-xs text-slate-500">Technical Partner</div>
-                      </div>
-                    </div>
-                    <div className="bg-white p-4 rounded-md shadow-sm border border-slate-200 flex items-center justify-center h-24">
-                      <div className="text-center">
-                        <div className="font-semibold text-slate-800">EcoSolutions</div>
-                        <div className="text-xs text-slate-500">Equipment Provider</div>
-                      </div>
-                    </div>
-                    <div className="bg-white p-4 rounded-md shadow-sm border border-slate-200 flex items-center justify-center h-24">
-                      <div className="text-center">
-                        <div className="font-semibold text-slate-800">Global Health</div>
-                        <div className="text-xs text-slate-500">Health Assessment</div>
-                      </div>
-                    </div>
-                    <div className="bg-white p-4 rounded-md shadow-sm border border-slate-200 flex items-center justify-center h-24">
-                      <div className="text-center">
-                        <div className="font-semibold text-slate-800">Local Gov't</div>
-                        <div className="text-xs text-slate-500">Regional Support</div>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -1286,7 +1140,7 @@ export default function CampaignDetails() {
                   <Award className="text-orange-600 mr-2 mt-1 flex-shrink-0" size={18} />
                   <div>
                     <p className="text-sm text-orange-800">
-                      <span className="font-semibold">Top Supporter Badge</span> - Donate ₹100 or more to receive a special supporter badge on your profile.
+                      <span className="font-semibold">Top Supporter Badge</span> - Donate ₹100 or more to receive a special supporter badge on your profile.This donation is under 80G exempted Donate via Card, UPI, & Wallet (INR Only)
                     </p>
                   </div>
                 </div>
@@ -1383,7 +1237,7 @@ export default function CampaignDetails() {
 
                     {/* Popular donation amounts */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
-                      {[25, 50, 100, 250].map((amount) => (
+                      {[100, 500, 1000, 1500].map((amount) => (
                         <div
                           key={amount}
                           onClick={() => handlePresetAmountClick(amount)}
@@ -1394,10 +1248,10 @@ export default function CampaignDetails() {
                             }`}
                         >
                           <div className="font-medium">₹{amount}</div>
-                          {amount === 25 && <div className="text-xs text-slate-500">Basic</div>}
-                          {amount === 50 && <div className="text-xs text-slate-500">Popular</div>}
-                          {amount === 100 && <div className="text-xs text-orange-600 font-medium">Supporter</div>}
-                          {amount === 250 && <div className="text-xs text-orange-600 font-medium">Champion</div>}
+                          {amount === 100 && <div className="text-xs text-slate-500">Basic</div>}
+                          {amount === 500 && <div className="text-xs text-slate-500">Popular</div>}
+                          {amount === 1000 && <div className="text-xs text-orange-600 font-medium">Supporter</div>}
+                          {amount === 1500 && <div className="text-xs text-orange-600 font-medium">Champion</div>}
                         </div>
                       ))}
                     </div>
@@ -1432,19 +1286,6 @@ export default function CampaignDetails() {
                       <label htmlFor="coverFees" className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                         Cover transaction fees (3%)
                       </label>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="isMonthly"
-                        checked={form.watch("isMonthly")}
-                        onCheckedChange={(checked) => form.setValue("isMonthly", checked === true)}
-                      />
-                      <div>
-                        <label htmlFor="isMonthly" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                          Make this a monthly donation
-                        </label>
-                        <p className="text-xs text-slate-500 mt-1">Your support will automatically renew each month</p>
-                      </div>
                     </div>
                   </div>
 
@@ -1498,12 +1339,34 @@ export default function CampaignDetails() {
                       <Shield className="mr-1" size={14} />
                       Your payment information is secure
                     </div>
-                    <div className="flex space-x-3">
-                      <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/visa.svg" alt="Visa" className="h-6 w-auto opacity-60" />
-                      <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/mastercard.svg" alt="Mastercard" className="h-6 w-auto opacity-60" />
-                      <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/americanexpress.svg" alt="American Express" className="h-6 w-auto opacity-60" />
-                      <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/googlepay.svg" alt="Google Pay" className="h-6 w-auto opacity-60" />
+                   
+                    <div className="flex space-x-3 items-center">
+                      <img
+                        src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/visa.svg"
+                        alt="Visa"
+                        className="h-6 w-auto"
+                        style={{ fill: '#1A1F71' }} // Visa blue
+                      />
+                      <img
+                        src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/mastercard.svg"
+                        alt="Mastercard"
+                        className="h-6 w-auto"
+                        style={{ fill: '#EB001B' }} // Mastercard red
+                      />
+                      <img
+                        src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/americanexpress.svg"
+                        alt="American Express"
+                        className="h-6 w-auto"
+                        style={{ fill: '#2E77BC' }} // AmEx blue
+                      />
+                      <img
+                        src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/googlepay.svg"
+                        alt="Google Pay"
+                        className="h-6 w-auto"
+                        style={{ fill: '#5F6368' }} // Google Pay gray tone
+                      />
                     </div>
+
                   </div>
 
                   {/* Impact message */}

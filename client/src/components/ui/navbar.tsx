@@ -43,7 +43,7 @@ const getLinkClassName = (path: string) => {
   return (
     <>
       {/* Top Bar - Only visible on large screens */}
-      <div className="hidden lg:block bg-[#0D1B2A] text-white py-2 px-5 wow fadeIn" data-wow-delay="0.1s">
+      <div className="hidden lg:block bg-[#0D1B2A] text-white py-1 px-5 wow fadeIn" data-wow-delay="0.1s">
         <div className="container mx-auto">
           <div className="flex justify-between items-center">
             <div className="flex items-center">
@@ -76,12 +76,12 @@ const getLinkClassName = (path: string) => {
       </div>
 
       {/* Main Navbar */}
-      <nav className="sticky top-0 z-50 bg-[#0D1B2A] text-white py-3 wow fadeIn" data-wow-delay="0.1s">
+      <nav className="sticky top-0 z-50 bg-[#0D1B2A] text-white py-1 wow fadeIn" data-wow-delay="0.1s">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Link href="/" className="text-xl font-bold flex items-center">
-            <img src="/img/dreamhomelogo.png" alt="img" className="w-[80px] h-[80px]" />
+            <img src="/img/dreamhopelog.svg" alt="img" className="w-auto h-[60px]" />
 
               <h1 className="font-bold m-0">
                 {/* <span className="text-white">Care</span>
