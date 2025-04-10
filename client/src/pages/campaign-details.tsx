@@ -1842,7 +1842,7 @@ export default function CampaignDetails() {
                   </div>
 
                   {/* Additional options */}
-                  <div className="space-y-3 pt-2">
+{/*                   <div className="space-y-3 pt-2">
                     <div className="flex items-center space-x-2">
                       <Checkbox
                         id="coverFees"
@@ -1858,7 +1858,7 @@ export default function CampaignDetails() {
                         Cover transaction fees (3%)
                       </label>
                     </div>
-                  </div>
+                  </div> */}
 
                   {/* Donation summary */}
                   <div className="bg-slate-50 p-3 rounded-md border border-slate-200 space-y-2">
