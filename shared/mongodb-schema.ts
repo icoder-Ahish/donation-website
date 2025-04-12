@@ -7,6 +7,7 @@ const objectIdSchema = z.string().or(z.object({
 }));
 
 // Campaign schema
+// Campaign schema
 export const CampaignSchema = z.object({
   _id: objectIdSchema.optional(),
   title: z.string(),
@@ -18,10 +19,17 @@ export const CampaignSchema = z.object({
   donorCount: z.number().default(0),
   daysLeft: z.number(),
   imageUrl: z.string(),
+  youtube_link: z.string().optional(),
+  img1: z.string().optional(),
+  img2: z.string().optional(),
+  img3: z.string().optional(),
+  img4: z.string().optional(),
+  img5: z.string().optional(),
   featured: z.boolean().default(false),
   createdAt: z.date().optional(),
   updatedAt: z.date().optional(),
 });
+
 
 // Donation schema
 export const donationSchema = z.object({

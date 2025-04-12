@@ -10,6 +10,12 @@ export interface ICampaign extends Document {
   donorCount: number;
   daysLeft: number;
   imageUrl: string;
+  youtube_link?: string;
+  img1?: string;
+  img2?: string;
+  img3?: string;
+  img4?: string;
+  img5?: string;
   featured: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -25,6 +31,12 @@ const CampaignSchema: Schema = new Schema({
   donorCount: { type: Number, required: true, default: 0 },
   daysLeft: { type: Number, required: true },
   imageUrl: { type: String, required: true },
+  youtube_link: { type: String, required: false },
+  img1: { type: String, required: false },
+  img2: { type: String, required: false },
+  img3: { type: String, required: false },
+  img4: { type: String, required: false },
+  img5: { type: String, required: false },
   featured: { type: Boolean, default: false },
 }, { 
   timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' },

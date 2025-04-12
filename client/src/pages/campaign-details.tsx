@@ -132,7 +132,7 @@ export default function CampaignDetails() {
     const initializeCashfree = async () => {
       try {
         const cashfreeInstance = await load({
-          mode: "sandbox", // Change to "production" for production environment
+          mode: "production", // Change to "production" for production environment
         });
         setCashfree(cashfreeInstance);
         setCashfreeLoaded(true);
@@ -205,9 +205,30 @@ export default function CampaignDetails() {
   // Add a state for the YouTube player
   const [youtubePlayer, setYoutubePlayer] = useState<any>(null);
   const youtubePlayerRef = useRef<HTMLDivElement>(null);
-
+  const {
+    data: campaign,
+    isLoading,
+    error,
+  } = useQuery<Campaign>({
+    queryKey: [`/api/campaigns/${campaignId}`],
+  });
   // Load YouTube API and initialize player
   useEffect(() => {
+    // Don't initialize if campaign data isn't loaded yet
+    if (!campaign) return;
+
+    // Extract video ID from YouTube URL
+    const getYoutubeVideoId = (url: string | undefined) => {
+      if (!url) return "PLRgoYpiLUE"; // Default video ID as fallback
+
+      const regExp =
+        /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+      const match = url.match(regExp);
+      return match && match[2].length === 11 ? match[2] : "PLRgoYpiLUE";
+    };
+
+    const videoId = getYoutubeVideoId(campaign?.youtube_link);
+
     // Load the YouTube IFrame Player API code asynchronously
     const tag = document.createElement("script");
     tag.src = "https://www.youtube.com/iframe_api";
@@ -219,7 +240,7 @@ export default function CampaignDetails() {
       if (!youtubePlayerRef.current) return;
 
       const player = new window.YT.Player(youtubePlayerRef.current, {
-        videoId: "PLRgoYpiLUE", // The video ID from your YouTube URL
+        videoId: videoId, // Use the extracted video ID
         playerVars: {
           autoplay: 1,
           mute: 1,
@@ -264,15 +285,15 @@ export default function CampaignDetails() {
         youtubePlayer.destroy();
       }
     };
-  }, []);
+  }, [campaign]);
+  const getYoutubeVideoId = (url: string | undefined) => {
+    if (!url) return "PLRgoYpiLUE"; // Default video ID as fallback
 
-  const {
-    data: campaign,
-    isLoading,
-    error,
-  } = useQuery<Campaign>({
-    queryKey: [`/api/campaigns/${campaignId}`],
-  });
+    const regExp =
+      /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return match && match[2].length === 11 ? match[2] : "PLRgoYpiLUE";
+  };
 
   const form = useForm<DonationForm>({
     resolver: zodResolver(donationFormSchema),
@@ -628,7 +649,9 @@ export default function CampaignDetails() {
           </h1>
           <div className="video-container relative mb-6 rounded-lg overflow-hidden shadow-lg">
             <iframe
-              src="https://www.youtube.com/embed/PLRgoYpiLUE?autoplay=1&mute=1&controls=1"
+              src={`https://www.youtube.com/embed/${getYoutubeVideoId(
+                campaign?.youtube_link
+              )}?autoplay=1&mute=1&controls=1`}
               className="video-player w-full h-full absolute top-0 left-0"
               title="Campaign Video"
               frameBorder="0"
@@ -1410,50 +1433,72 @@ export default function CampaignDetails() {
               </h3>
 
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {/* Main campaign image */}
+                <div className="mb-6">
+                  <img
+                    src={campaign.imageUrl || "/img/placeholder.jpg"}
+                    alt={campaign.title}
+                    className="w-full h-auto rounded-lg shadow-lg"
+                    onError={(e) => {
+                      e.currentTarget.src = "/img/placeholder.jpg";
+                    }}
+                  />
+                </div>
+
+                {/* Additional campaign images */}
                 <div className="aspect-square overflow-hidden rounded-md shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02]">
                   <img
-                    src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=300&q=80"
-                    alt="Project"
+                    src={campaign.img1 || "/img/placeholder.jpg"}
+                    alt="Campaign Image 1"
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = "/img/placeholder.jpg";
+                    }}
                   />
                 </div>
                 <div className="aspect-square overflow-hidden rounded-md shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02]">
                   <img
-                    src="https://images.unsplash.com/photo-1593526613712-7b4b8c90d0a7?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=300&q=80"
-                    alt="Project"
+                    src={campaign.img2 || "/img/placeholder.jpg"}
+                    alt="Campaign Image 2"
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = "/img/placeholder.jpg";
+                    }}
                   />
                 </div>
                 <div className="aspect-square overflow-hidden rounded-md shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02]">
                   <img
-                    src="https://images.unsplash.com/photo-1576502200916-3808e07386a5?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=300&q=80"
-                    alt="Project"
+                    src={campaign.img3 || "/img/placeholder.jpg"}
+                    alt="Campaign Image 3"
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = "/img/placeholder.jpg";
+                    }}
                   />
                 </div>
                 <div className="aspect-square overflow-hidden rounded-md shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02]">
                   <img
-                    src="https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=300&q=80"
-                    alt="Project"
+                    src={campaign.img4 || "/img/placeholder.jpg"}
+                    alt="Campaign Image 4"
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = "/img/placeholder.jpg";
+                    }}
                   />
                 </div>
                 <div className="aspect-square overflow-hidden rounded-md shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02]">
                   <img
-                    src="https://images.unsplash.com/photo-1594708767771-a5f97143529a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=300&q=80"
-                    alt="Project"
+                    src={campaign.img5 || "/img/placeholder.jpg"}
+                    alt="Campaign Image 5"
                     className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="aspect-square overflow-hidden rounded-md shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02]">
-                  <img
-                    src="https://images.unsplash.com/photo-1593113598332-cd59a93333c3?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=300&q=80"
-                    alt="Project"
-                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = "/img/placeholder.jpg";
+                    }}
                   />
                 </div>
               </div>
             </TabsContent>
+
             <TabsContent
               value="timeline"
               className="p-5 bg-white rounded-md shadow-sm"
@@ -1499,9 +1544,15 @@ export default function CampaignDetails() {
                       needs.
                     </p>
                     <img
-                      src="https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80"
+                      src={
+                        campaign.img1 ||
+                        "https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80"
+                      }
                       alt="Project Launch"
                       className="mt-3 rounded-md w-full h-40 object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = "/img/placeholder.jpg";
+                      }}
                     />
                   </div>
                 </div>
@@ -1529,14 +1580,26 @@ export default function CampaignDetails() {
                     </p>
                     <div className="grid grid-cols-2 gap-2 mt-3">
                       <img
-                        src="https://images.unsplash.com/photo-1541252260730-0412e8e2108e?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=200&q=80"
+                        src={
+                          campaign.img2 ||
+                          "https://images.unsplash.com/photo-1541252260730-0412e8e2108e?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=200&q=80"
+                        }
                         alt="Installation"
                         className="rounded-md w-full h-28 object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = "/img/placeholder.jpg";
+                        }}
                       />
                       <img
-                        src="https://images.unsplash.com/photo-1581578017093-cd30fce4eeb7?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=200&q=80"
+                        src={
+                          campaign.img3 ||
+                          "https://images.unsplash.com/photo-1581578017093-cd30fce4eeb7?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=200&q=80"
+                        }
                         alt="Clean Water"
                         className="rounded-md w-full h-28 object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = "/img/placeholder.jpg";
+                        }}
                       />
                     </div>
                   </div>
@@ -1842,7 +1905,7 @@ export default function CampaignDetails() {
                   </div>
 
                   {/* Additional options */}
-{/*                   <div className="space-y-3 pt-2">
+                  {/*                   <div className="space-y-3 pt-2">
                     <div className="flex items-center space-x-2">
                       <Checkbox
                         id="coverFees"

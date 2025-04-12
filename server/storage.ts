@@ -233,90 +233,136 @@ export class DatabaseStorage implements IStorage {
     
     if (existingCampaigns.length === 0) {
       // Add sample campaigns if the database is empty
-      const sampleCampaigns: CampaignData[] = [
+      const sampleCampaigns: InsertCampaign[] = [
         {
-          title: "Clean Water Initiative",
-          description: "Providing clean drinking water to rural communities facing severe drought and water contamination issues.",
-          fullDescription: `
-            <h4>The Challenge</h4>
-            <p>In many rural communities around the world, access to clean drinking water remains a critical challenge. Families must walk miles to collect water from contaminated sources, leading to waterborne diseases that affect health, education, and economic opportunities.</p>
-            
-            <h4>Our Solution</h4>
-            <p>The Clean Water Initiative aims to install water purification systems in 15 villages, benefiting over 7,500 people. Each system can provide up to 500 liters of clean water per day, drastically reducing waterborne diseases and improving quality of life.</p>
-            
-            <h4>How Your Donation Helps</h4>
-            <ul>
-              <li>₹250 provides clean water to one person for a year</li>
-              <li>₹1000 funds water quality testing for an entire community</li>
-              <li>₹5000 contributes to a community water purification system</li>
-              <li>₹10,000 sponsors a complete water access point for a village</li>
-            </ul>
-            
-            <h4>Impact and Sustainability</h4>
-            <p>Beyond installation, we train local community members to maintain the systems, ensuring long-term sustainability. Our team conducts regular water quality testing and provides ongoing technical support.</p>
-          `,
-          category: "Environment",
-          goalAmount: 50000,
-          raisedAmount: 0,
-          donorCount: 0,
-          daysLeft: 20,
-          imageUrl: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80"
-        },
-        {
-          title: "Education for All",
-          description: "Supporting underprivileged children with school supplies, scholarships, and improved learning facilities.",
-          fullDescription: `
-            <h4>The Challenge</h4>
-            <p>Education is a fundamental right, yet millions of children around the world lack access to quality education due to poverty, lack of resources, and inadequate facilities.</p>
-            
-            <h4>Our Solution</h4>
-            <p>The Education for All campaign aims to support 500 underprivileged children by providing school supplies, scholarships, teacher training, and improved learning facilities. Our focus is on creating sustainable educational environments that foster growth and learning.</p>
-            
-            <h4>How Your Donation Helps</h4>
-            <ul>
-              <li>₹25 provides a school supply kit for one child</li>
-              <li>₹100 funds training for a teacher</li>
-              <li>₹500 contributes to classroom renovations</li>
-              <li>₹1,000 provides a full year scholarship for a student</li>
-            </ul>
-            
-            <h4>Impact and Sustainability</h4>
-            <p>We work closely with local schools and communities to ensure the sustainability of our initiatives. Regular progress reports and student performance tracking help measure the impact of your donations.</p>
-          `,
-          category: "Education",
-          goalAmount: 30000,
-          raisedAmount: 0,
-          donorCount: 0,
-          daysLeft: 15,
-          imageUrl: "https://images.unsplash.com/photo-1497375638960-ca368c7231e4?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80"
-        },
-        {
-          title: "Healthcare Access",
+          title: "Dog MediHelp",
           description: "Bringing essential medical services to underserved communities through mobile clinics and telehealth solutions.",
           fullDescription: `
-            <h4>The Challenge</h4>
-            <p>Millions of people around the world lack access to essential healthcare services due to geographical, economic, and social barriers. This results in preventable diseases, untreated conditions, and a lower quality of life.</p>
+            <h4>The Mission</h4>
+            <p>In the heart of Satna, Madhya Pradesh, a dedicated rescue center is making a profound impact on the lives of street dogs in dire need. This center, located in a humble yet spacious kothi, is home to more than 50 disabled and paralyzed dogs who have found solace and comfort here. The journey of this rescue mission began with a deep commitment to save street dogs, and since its inception, the center has tirelessly cared for over 300 street dogs, providing them with life-saving bandages, meals, and a glimmer of hope.</p>
             
-            <h4>Our Solution</h4>
-            <p>The Healthcare Access initiative aims to bridge the healthcare gap by establishing mobile clinics and telehealth services in underserved communities. These solutions bring qualified medical professionals, essential medications, and preventive care to those who need it most.</p>
+            <h4>Our Work</h4>
+            <p>For the past six years, this center has been a sanctuary for animals in need, especially those suffering from paralysis. Many of these dogs were found in tragic conditions on the streets—victims of accidents, abuse, or neglect. Once rescued, they are given not only medical care but also a sense of safety, comfort, and love.</p>
+            
+            <p>The shelter's mission is simple: to provide the best quality of life for these animals who would otherwise struggle to survive on the streets. Each dog that arrives is given immediate medical attention, nutritious food, and a clean, secure environment where they can heal, play, and even undergo physical therapy.</p>
+            
+            <h4>Current Needs</h4>
+            <p>However, as the shelter continues to grow in both the number of animals it rescues and the variety of medical needs they face, more resources are needed to continue this crucial work. Among the most pressing needs is an X-ray machine to help diagnose the injuries and conditions these dogs suffer from, a tool that would be invaluable in providing the most accurate and effective treatment.</p>
+            
+            <p>Additionally, the shelter urgently requires 100 wheelchairs to help the dogs who are paralyzed and unable to move on their own. The physical mobility that these wheelchairs offer would greatly improve the quality of life for the dogs, allowing them to explore their surroundings, play, and feel more independent.</p>
+            
+            <p>Moreover, an ambulance is crucial for the timely rescue and transportation of injured dogs. Without it, the shelter's ability to quickly respond to emergency calls and provide on-the-spot medical assistance is limited. An ambulance would make a significant difference, ensuring that injured or abandoned dogs receive immediate care when needed most.</p>
             
             <h4>How Your Donation Helps</h4>
             <ul>
-              <li>₹25 provides basic medications for a patient</li>
-              <li>₹100 funds a medical check-up for five people</li>
-              <li>₹500 contributes to medical equipment for mobile clinics</li>
-              <li>₹1,000 sponsors a day of full medical services for a community</li>
+              <li>₹5,000 provides medical supplies for one dog</li>
+              <li>₹20,000 contributes to a wheelchair for a paralyzed dog</li>
+              <li>₹50,000 helps fund diagnostic equipment</li>
+              <li>₹1,00,000 supports the purchase of an ambulance</li>
             </ul>
             
-            <h4>Impact and Sustainability</h4>
-            <p>Our healthcare initiatives prioritize not only immediate medical care but also community education and local healthcare capacity building to ensure long-term health improvements.</p>
+            <h4>Impact and Future</h4>
+            <p>Despite these challenges, the team at the Help Dog Rescue Center in Satna continues to work around the clock, driven by their passion for animal welfare. Through their hard work and the generosity of donors, they have been able to make a lasting difference in the lives of so many animals.</p>
+            
+            <p>But as the number of dogs in need continues to rise, it is clear that Help Dog Rescue Center's work cannot continue without further support. Donations, whether large or small, can make a world of difference in ensuring these animals get the care, love, and respect they deserve. Your contribution will help provide wheelchairs, an X-ray machine, an ambulance, and more—giving these street dogs a better chance at life.</p>
+            
+            <p>Together, we can help Help Dog Rescue Center continue their mission of compassion, giving these deserving dogs a future filled with dignity, safety, and love. Let's make sure these animals never have to endure the harsh streets again.</p>
           `,
           category: "Healthcare",
-          goalAmount: 45000,
-          raisedAmount: 0,
-          donorCount: 0,
+          goalAmount: "850000.00",
           daysLeft: 8,
-          imageUrl: "https://images.unsplash.com/photo-1561037404-61cd46aa615b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80"
+          youtube_link: "https://www.youtube.com/watch?v=zwHF9Yk9al4",
+          imageUrl: "/img/dog3.jpeg",
+          img1: "/img/dog1.jpeg",
+          img2: "/img/dog2.jpeg",
+          img3: "/img/dog3.jpeg",
+          img4: "/img/dog4.jpeg",
+          img5: "/img/dog5.jpeg",
+        },
+        {
+          title: "Dog Rescue",
+          description: "Bringing essential medical services to underserved communities through mobile clinics and telehealth solutions.",
+          fullDescription: `
+            <h4>The Mission</h4>
+            <p>In the heart of Satna, Madhya Pradesh, a dedicated rescue center is making a profound impact on the lives of street dogs in dire need. This center, located in a humble yet spacious kothi, is home to more than 50 disabled and paralyzed dogs who have found solace and comfort here. The journey of this rescue mission began with a deep commitment to save street dogs, and since its inception, the center has tirelessly cared for over 300 street dogs, providing them with life-saving bandages, meals, and a glimmer of hope.</p>
+            
+            <h4>Our Work</h4>
+            <p>For the past six years, this center has been a sanctuary for animals in need, especially those suffering from paralysis. Many of these dogs were found in tragic conditions on the streets—victims of accidents, abuse, or neglect. Once rescued, they are given not only medical care but also a sense of safety, comfort, and love.</p>
+            
+            <p>The shelter's mission is simple: to provide the best quality of life for these animals who would otherwise struggle to survive on the streets. Each dog that arrives is given immediate medical attention, nutritious food, and a clean, secure environment where they can heal, play, and even undergo physical therapy.</p>
+            
+            <h4>Current Needs</h4>
+            <p>However, as the shelter continues to grow in both the number of animals it rescues and the variety of medical needs they face, more resources are needed to continue this crucial work. Among the most pressing needs is an X-ray machine to help diagnose the injuries and conditions these dogs suffer from, a tool that would be invaluable in providing the most accurate and effective treatment.</p>
+            
+            <p>Additionally, the shelter urgently requires 100 wheelchairs to help the dogs who are paralyzed and unable to move on their own. The physical mobility that these wheelchairs offer would greatly improve the quality of life for the dogs, allowing them to explore their surroundings, play, and feel more independent.</p>
+            
+            <p>Moreover, an ambulance is crucial for the timely rescue and transportation of injured dogs. Without it, the shelter's ability to quickly respond to emergency calls and provide on-the-spot medical assistance is limited. An ambulance would make a significant difference, ensuring that injured or abandoned dogs receive immediate care when needed most.</p>
+            
+            <h4>How Your Donation Helps</h4>
+            <ul>
+              <li>₹5,000 provides medical supplies for one dog</li>
+              <li>₹25,00 contributes to a wheelchair for a paralyzed dog</li>
+              <li>₹50,000 helps fund diagnostic equipment</li>
+              <li>₹1,00,000 supports the purchase of an ambulance</li>
+            </ul>
+            
+            <h4>Impact and Future</h4>
+            <p>Despite these challenges, the team at the Help Dog Rescue Center in Satna continues to work around the clock, driven by their passion for animal welfare. Through their hard work and the generosity of donors, they have been able to make a lasting difference in the lives of so many animals.</p>
+            
+            <p>But as the number of dogs in need continues to rise, it is clear that Help Dog Rescue Center's work cannot continue without further support. Donations, whether large or small, can make a world of difference in ensuring these animals get the care, love, and respect they deserve. Your contribution will help provide wheelchairs, an X-ray machine, an ambulance, and more—giving these street dogs a better chance at life.</p>
+            
+            <p>Together, we can help Help Dog Rescue Center continue their mission of compassion, giving these deserving dogs a future filled with dignity, safety, and love. Let's make sure these animals never have to endure the harsh streets again.</p>
+          `,
+          category: "Healthcare",
+          youtube_link: "https://www.youtube.com/watch?v=zwHF9Yk9al4",
+          goalAmount: "750000.00",
+          daysLeft: 8,
+          imageUrl: "/img/dog.jpeg",
+          img1: "/img/dog1.jpeg",
+          img2:"/img/dog2.jpeg",
+          img3:"/img/dog3.jpeg",
+          img4:"/img/dog4.jpeg",
+          img5:"/img/dog5.jpeg",
+        },
+        {
+          title: "Help My Uncle Get the Medical Treatment He Deserves",
+          description: "Supporting a knee replacement surgery and brain blood clot treatment for my bedridden uncle in Satna, Madhya Pradesh.",
+          fullDescription: `
+            <h4>The Situation</h4>
+            <p>Since 2021, my uncle has been struggling with severe health issues. He has been unable to walk due to a debilitating knee condition that has left him bedridden. To make matters worse, he also suffered from a brain blood clot, further complicating his health. This has not only affected his physical health but also his emotional well-being.</p>
+            
+            <h4>The Challenge</h4>
+            <p>Unfortunately, my uncle's situation is worsened by the fact that there is no one in the family who is able to work and support him. We have no source of income, and his treatment has become a huge financial burden. Despite the ongoing struggles, we are still holding onto hope, but we need help.</p>
+            
+            <h4>The Treatment</h4>
+            <p>Doctors have advised him to undergo a knee replacement surgery, which is crucial for his ability to walk again. However, the cost of this surgery, along with post-operation medical care, totals ₹17,00,000 — an amount that is beyond our reach. Without this surgery, my uncle's condition will only worsen, and his ability to live a normal life will remain out of reach.</p>
+            
+            <h4>How Your Donation Helps</h4>
+            <ul>
+              <li>₹5,000 helps with initial medical consultations</li>
+              <li>₹25,000 contributes to pre-surgery medications and tests</li>
+              <li>₹100,000 helps cover a portion of the surgery costs</li>
+              <li>₹500,000 significantly advances us toward the total treatment goal</li>
+            </ul>
+            
+            <h4>Our Appeal</h4>
+            <p>We are reaching out to you today, hoping for your support. My uncle has always been a strong person, but now, he needs your help. The surgery is urgent, and the total cost of ₹17 lakhs includes not just the surgery, but all the medical expenses, hospital stays, and medications required for his recovery.</p>
+            
+            <p>Your generous donation can help us get one step closer to giving him a life where he can walk again, regain his independence, and live without constant pain. Every contribution, no matter how small, will make a world of difference in his life.</p>
+            
+            <h4>Location</h4>
+            <p>Ward No. 37, Satna, Madhya Pradesh, India</p>
+          `,
+          category: "Healthcare",
+          goalAmount: "1700000.00",
+          daysLeft: 30,
+          youtube_link: "https://www.youtube.com/watch?v=ew0IpJBwc_g",
+          img1: "",
+          img2:"",
+          img3:"",
+          img4:"",
+          img5:"",
+          imageUrl: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80"
         }
       ];
 
