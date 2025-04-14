@@ -63,7 +63,7 @@ export default function CampaignDetails() {
   const { toast } = useToast();
   const campaignId = id;
   const [amountType, setAmountType] = useState<"preset" | "custom">("preset");
-  const [presetAmount, setPresetAmount] = useState<number>(50);
+  const [presetAmount, setPresetAmount] = useState<number>(1000);
   const [cashfreeLoaded, setCashfreeLoaded] = useState(false);
   const [cashfreeError, setCashfreeError] = useState(false);
   const [showStickyDonate, setShowStickyDonate] = useState(false);
