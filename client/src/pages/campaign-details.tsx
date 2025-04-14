@@ -301,7 +301,7 @@ export default function CampaignDetails() {
       firstName: "",
       lastName: "",
       email: "",
-      amount: 50,
+      amount: 500,
       coverFees: false,
       isMonthly: false,
       campaignId: campaignId || "",
@@ -640,8 +640,7 @@ export default function CampaignDetails() {
           {/* Campaign video player */}
           <p className="text-lg text-red-600 font-semibold mb-4 flex items-center gap-2">
             <Clock className="w-5 h-5" />
-            Urgent Help Needed: Every rupee counts in this critical moment. Your
-            support can bring hope and healing—please donate today.
+            Urgent Help Needed: This fundraiser is in an urgent need of funds.
           </p>
 
           <h1 className="text-3xl font-bold mb-3 text-slate-800">
@@ -1235,7 +1234,7 @@ export default function CampaignDetails() {
                   <div className="space-y-3">
                     <div className="flex items-center">
                       <div className="bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm mr-3 flex-shrink-0">
-                        <span className="text-orange-500 font-bold">₹100</span>
+                        <span className="text-orange-500 font-bold">₹500</span>
                       </div>
                       <div className="text-slate-700">
                         Provides clean water to one person for a month
@@ -1244,7 +1243,7 @@ export default function CampaignDetails() {
 
                     <div className="flex items-center">
                       <div className="bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm mr-3 flex-shrink-0">
-                        <span className="text-orange-500 font-bold">₹500</span>
+                        <span className="text-orange-500 font-bold">₹1,000</span>
                       </div>
                       <div className="text-slate-700">
                         Funds water quality testing for an entire community
@@ -1253,7 +1252,7 @@ export default function CampaignDetails() {
 
                     <div className="flex items-center">
                       <div className="bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm mr-3 flex-shrink-0">
-                        <span className="text-orange-500 font-bold">₹1000</span>
+                        <span className="text-orange-500 font-bold">₹2,000</span>
                       </div>
                       <div className="text-slate-700">
                         Provides clean water to one person for a year
@@ -1262,7 +1261,7 @@ export default function CampaignDetails() {
 
                     <div className="flex items-center">
                       <div className="bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm mr-3 flex-shrink-0">
-                        <span className="text-orange-500 font-bold">₹1500</span>
+                        <span className="text-orange-500 font-bold">₹3,000</span>
                       </div>
                       <div className="text-slate-700">
                         Contributes to a community water purification system
@@ -1271,7 +1270,7 @@ export default function CampaignDetails() {
 
                     <div className="flex items-center">
                       <div className="bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm mr-3 flex-shrink-0">
-                        <span className="text-orange-500 font-bold">₹2000</span>
+                        <span className="text-orange-500 font-bold">₹4,000</span>
                       </div>
                       <div className="text-slate-700">
                         Sponsors a complete water access point for a village
@@ -1845,7 +1844,7 @@ export default function CampaignDetails() {
 
                     {/* Popular donation amounts */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
-                      {[100, 500, 1000, 1500].map((amount) => (
+                      {[500, 1000, 2000, 3000].map((amount) => (
                         <div
                           key={amount}
                           onClick={() => handlePresetAmountClick(amount)}
@@ -1857,20 +1856,20 @@ export default function CampaignDetails() {
                 }`}
                         >
                           <div className="font-medium">₹{amount}</div>
-                          {amount === 100 && (
+                          {amount === 500 && (
                             <div className="text-xs text-slate-500">Basic</div>
                           )}
-                          {amount === 500 && (
+                          {amount === 1000 && (
                             <div className="text-xs text-slate-500">
                               Popular
                             </div>
                           )}
-                          {amount === 1000 && (
+                          {amount === 2000 && (
                             <div className="text-xs text-orange-600 font-medium">
                               Supporter
                             </div>
                           )}
-                          {amount === 1500 && (
+                          {amount === 3000 && (
                             <div className="text-xs text-orange-600 font-medium">
                               Champion
                             </div>
