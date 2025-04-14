@@ -235,7 +235,7 @@ export class DatabaseStorage implements IStorage {
       // Add sample campaigns if the database is empty
       const sampleCampaigns: InsertCampaign[] = [
         {
-          title: "Dog MediHelp",
+          title: "A Ray of Hope for Paralyzed Street Dogs: How Help Dog Rescue Center in Satna is Giving a Second Chance at Life",
           description: "Bringing essential medical services to underserved communities through mobile clinics and telehealth solutions.",
           fullDescription: `
             <h4>The Mission</h4>
@@ -271,7 +271,7 @@ export class DatabaseStorage implements IStorage {
           category: "Healthcare",
           goalAmount: "850000.00",
           daysLeft: 8,
-          youtube_link: "https://www.youtube.com/watch?v=zwHF9Yk9al4",
+          youtube_link: "https://www.youtube.com/watch?v=GUPMQwZ2tx0",
           imageUrl: "/img/dog3.jpeg",
           img1: "/img/dog1.jpeg",
           img2: "/img/dog2.jpeg",
