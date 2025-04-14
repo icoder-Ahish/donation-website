@@ -6,8 +6,7 @@ import { log } from "./vite";
 dotenv.config();
 
 const MONGODB_URI =
-  process.env.MONGODB_URI ||
-  "mongodb+srv://rkr29581:SJbXwOi9d5CREOS0@cluster0.6c21gtp.mongodb.net/donation_platform?retryWrites=true&w=majority&appName=Cluster0";
+  process.env.MONGODB_URI";
 
 // MongoDB connection options 
 // Modern MongoDB driver (v4+) no longer needs useNewUrlParser or useUnifiedTopology
